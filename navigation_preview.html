@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proposta Navigazione InfoStranieri</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0f4c81;
+            --bg: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --accent: #0ea5e9;
+            --danger: #ef4444;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 40px;
+            padding: 40px;
+            margin: 0;
+        }
+        .phone-container {
+            width: 375px;
+            height: 700px;
+            background: var(--bg);
+            border-radius: 40px;
+            border: 12px solid #1e293b;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        .screen-header {
+            background: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 800;
+            color: var(--primary);
+            font-size: 18px;
+        }
+        .scrollable {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .label-tag {
+            text-align: center;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            font-size: 14px;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        /* GRID VIEW (BEFORE) */
+        .section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .card i {
+            font-size: 28px;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        .card span {
+            font-size: 13px;
+            font-weight: 700;
+            color: #334155;
+            line-height: 1.3;
+        }
+
+        /* FLAT VIEW (AFTER) */
+        .category-header {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .category-header::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #cbd5e1;
+        }
+        .law-item {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #e2e8f0;
+            position: relative;
+        }
+        .law-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+        .law-ref {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        .law-desc {
+            font-size: 13px;
+            color: #475569;
+            line-height: 1.4;
+        }
+        .chevron {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #cbd5e1;
+        }
+        .badge-new {
+            background: var(--danger);
+            color: white;
+            font-size: 9px;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+            display: inline-block;
+        }
+        
+        .mock-status-bar {
+            height: 24px;
+            background: white;
+            padding: 5px 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- STATE 1: CURRENT (GRID) -->
+    <div>
+        <div class="label-tag">Stato Attuale (2+ click per il dettaglio)</div>
+        <div class="phone-container">
+            <div class="mock-status-bar">
+                <span>9:41</span>
+                <div>
+                   <i class="fas fa-signal"></i>
+                   <i class="fas fa-wifi"></i>
+                   <i class="fas fa-battery-full"></i>
+                </div>
+            </div>
+            <div class="screen-header">Protezione Internazionale</div>
+            <div class="scrollable">
+                <div class="section-title">Scegli la tipologia di protezione</div>
+                <div class="grid">
+                    <div class="card">
+                        <i class="fas fa-ribbon"></i>
+                        <span>Asilo Politico</span>
+                    </div>
+                    <div class="card">
+                        <i class="fas fa-shield-halved"></i>
+                        <span>Protezione Sussidiaria</span>
+                    </div>
+                    <div class="card">
+                        <i class="fas fa-shield-check"></i>
+                        <span>Protezione Speciale</span>
+                    </div>
+                    <div class="card">
+                        <i class="fas fa-landmark"></i>
+                        <span>Asilo Costituzionale</span>
+                    </div>
+                    <div class="card">
+                        <i class="fas fa-comments"></i>
+                        <span>Procedura d'Esame</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STATE 2: PROPOSED (FLAT) -->
+    <div>
+        <div class="label-tag">Proposta (1 click per il dettaglio)</div>
+        <div class="phone-container">
+            <div class="mock-status-bar">
+                <span>9:41</span>
+                <div>
+                   <i class="fas fa-signal"></i>
+                   <i class="fas fa-wifi"></i>
+                   <i class="fas fa-battery-full"></i>
+                </div>
+            </div>
+            <div class="screen-header">Protezione Internazionale</div>
+            <div class="scrollable" style="padding-top: 5px;">
+                
+                <div class="category-header">Asilo Politico</div>
+                <div class="law-item">
+                    <div class="law-title">Riconoscimento Status di Rifugiato</div>
+                    <div class="law-ref">Conv. Ginevra 1951 - D.Lgs. 251/07</div>
+                    <div class="law-desc">Riconosciuto a chi ha un fondato timore di persecuzione...</div>
+                    <i class="fas fa-chevron-right chevron"></i>
+                </div>
+
+                <div class="category-header">Protezione Sussidiaria</div>
+                <div class="law-item">
+                    <div class="law-title">Protezione Sussidiaria</div>
+                    <div class="law-ref">D.Lgs. 251/2007</div>
+                    <div class="law-desc">Per chi rischia danni gravi (tortura, guerra) se rientra...</div>
+                    <i class="fas fa-chevron-right chevron"></i>
+                </div>
+
+                <div class="category-header">Protezione Speciale</div>
+                <div class="law-item" style="border-color: #bae6fd; background: #f0f9ff;">
+                    <div class="badge-new">NOVITÀ</div>
+                    <div class="law-title">Protezione Speciale (Cutro)</div>
+                    <div class="law-ref">Legge 50/2023</div>
+                    <div class="law-desc">Forma di protezione per casi eccezionali, rischi tortura...</div>
+                    <i class="fas fa-chevron-right chevron" style="color: #0ea5e9"></i>
+                </div>
+
+                <div class="category-header">Procedura d'Esame</div>
+                <div class="law-item">
+                    <div class="law-title">Modello C3 e Prima Accoglienza</div>
+                    <div class="law-ref">D.Lgs. 25/2008</div>
+                    <i class="fas fa-chevron-right chevron"></i>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

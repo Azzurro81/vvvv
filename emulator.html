@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfoStranieri - Mobile Preview</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #e5e7eb;
+            font-family: sans-serif;
+            flex-direction: column;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .smartphone {
+            position: relative;
+            width: 390px;
+            height: 844px; /* iPhone 13/14 Pro dimensions */
+            margin: auto;
+            border: 16px solid black;
+            border-top-width: 60px;
+            border-bottom-width: 60px;
+            border-radius: 36px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            background: #fff;
+            overflow: hidden;
+        }
+        
+        /* The notch / camera pill */
+        .smartphone:before {
+            content: '';
+            display: block;
+            width: 120px;
+            height: 35px;
+            position: absolute;
+            top: -47px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: black;
+            border-radius: 20px;
+        }
+
+        .smartphone iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Anteprima Mobile: InfoStranieri</h1>
+    <div class="smartphone">
+        <iframe src="http://localhost:8082" title="App InfoStranieri"></iframe>
+    </div>
+</body>
+</html>
