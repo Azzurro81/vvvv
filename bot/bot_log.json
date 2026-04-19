@@ -1,0 +1,23 @@
+[
+  {
+    "timestamp": "2026-04-13T00:34:23.920Z",
+    "totalArticles": 96,
+    "newArticles": 96,
+    "relevantArticles": 19,
+    "lawsAdded": 3
+  },
+  {
+    "timestamp": "2026-04-13T00:36:54.437Z",
+    "totalArticles": 96,
+    "newArticles": 96,
+    "relevantArticles": 19,
+    "lawsAdded": 0
+  },
+  {
+    "timestamp": "2026-04-13T00:39:31.077Z",
+    "totalArticles": 96,
+    "newArticles": 77,
+    "relevantArticles": 0,
+    "lawsAdded": 0
+  }
+]

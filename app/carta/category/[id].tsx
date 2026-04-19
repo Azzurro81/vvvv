@@ -14,7 +14,7 @@ export default function CartaCategoryLawsScreen() {
   }, []));
 
   const category = LONG_TERM_CATEGORIES.find(c => c.id === id);
-  const laws = LONG_TERM_LAWS.filter(l => l.categoryId === id);
+  const laws = id === 'novita' ? LONG_TERM_LAWS.filter(l => l.isNew) : LONG_TERM_LAWS.filter(l => l.categoryId === id);
 
   if (!category) return null;
 

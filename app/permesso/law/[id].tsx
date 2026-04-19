@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
 import { RESIDENCE_LAWS, markLawAsRead } from '../../../constants/residence_laws';
 import { Ionicons } from '@expo/vector-icons';
+import DocumentAccordion from '../../../components/DocumentAccordion';
 
 export default function PermessoLawDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -58,10 +59,7 @@ export default function PermessoLawDetailScreen() {
             <>
                 <Text style={styles.sectionTitle}>Cosa mettere nel Kit Postale</Text>
                 {law.documentsNeeded.map((doc, i) => (
-                    <View key={i} style={styles.bulletItem}>
-                        <Ionicons name="mail-outline" size={18} color="#0ea5e9" style={{marginTop: 4, marginRight: 10}} />
-                        <Text style={styles.paragraphBullet}>{doc}</Text>
-                    </View>
+                    <DocumentAccordion key={i} documentName={doc} />
                 ))}
             </>
             )}

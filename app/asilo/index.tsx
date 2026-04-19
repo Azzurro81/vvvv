@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { useRouter, useFocusEffect } from 'expo-router';
+import { useRouter, useFocusEffect, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ASYLUM_CATEGORIES, categoryHasUnreadNews } from '../../constants/asylum_laws';
 
@@ -9,13 +9,14 @@ export default function AsiloFoldersScreen() {
     const [cats] = useState(ASYLUM_CATEGORIES);
     const [, setUpdater] = useState(0);
 
-    // Refresh for unread novelties bubbling up to folders
     useFocusEffect(useCallback(() => {
         setUpdater(Date.now());
     }, []));
 
     return (
-       <ScrollView style={styles.container} contentContainerStyle={styles.listContent}>
+       <>
+           <Stack.Screen options={{ title: 'Protezione Internazionale' }} />
+           <ScrollView style={styles.container} contentContainerStyle={styles.listContent}>
            <Text style={styles.sectionTitle}>Scegli la tipologia di protezione</Text>
            <View style={styles.grid}>
               {cats.map(cat => {
@@ -37,7 +38,8 @@ export default function AsiloFoldersScreen() {
                  )
               })}
            </View>
-       </ScrollView>
+        </ScrollView>
+       </>
     )
 }
 

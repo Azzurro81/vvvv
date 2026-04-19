@@ -14,7 +14,7 @@ export default function CittadinanzaCategoryLawsScreen() {
   }, []));
 
   const category = CITIZENSHIP_CATEGORIES.find(c => c.id === id);
-  const laws = CITIZENSHIP_LAWS.filter(l => l.categoryId === id);
+  const laws = id === 'novita' ? CITIZENSHIP_LAWS.filter(l => l.isNew) : CITIZENSHIP_LAWS.filter(l => l.categoryId === id);
 
   if (!category) return null;
 

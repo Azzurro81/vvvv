@@ -3,16 +3,29 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
 import { FAMILY_LAWS, markLawAsRead } from '../../../constants/family_laws';
 import { Ionicons } from '@expo/vector-icons';
+import DocumentAccordion from '../../../components/DocumentAccordion';
+
+import { useTranslatedLaw } from '../../../hooks/useTranslatedLaw';
 
 export default function FamigliaLawDetailScreen() {
   const { id } = useLocalSearchParams();
-  const law = FAMILY_LAWS.find(l => l.id === id);
+  const initialLaw = FAMILY_LAWS.find(l => l.id === id);
+  const { translatedLaw: law, isLoading } = useTranslatedLaw(initialLaw);
 
   useEffect(() => {
-    if (law && law.isNew) {
-       markLawAsRead(law.id);
+    if (initialLaw && initialLaw.isNew) {
+       markLawAsRead(initialLaw.id);
     }
-  }, [law]);
+  }, [initialLaw]);
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.center]}>
+        <Ionicons name="sync" size={48} color="#0f4c81" />
+        <Text style={styles.loadingText}>Traduzione in corso...</Text>
+      </View>
+    );
+  }
 
   if (!law) {
     return <View style={styles.container}><Text style={{padding: 20}}>Normativa non trovata</Text></View>;
@@ -47,7 +60,7 @@ export default function FamigliaLawDetailScreen() {
             <Text style={styles.paragraph}>{law.description}</Text>
             
             <Text style={styles.sectionTitle}>Requisiti di Base</Text>
-            {law.requirements.map((req, i) => (
+            {law.requirements.map((req: string, i: number) => (
             <View key={i} style={styles.bulletItem}>
                 <View style={styles.bulletPoint} />
                 <Text style={styles.paragraphBullet}>{req}</Text>
@@ -57,11 +70,8 @@ export default function FamigliaLawDetailScreen() {
             {law.documentsNeeded && (
             <>
                 <Text style={styles.sectionTitle}>Documentazione da Allegare</Text>
-                {law.documentsNeeded.map((doc, i) => (
-                    <View key={i} style={styles.bulletItem}>
-                        <Ionicons name="document-attach-outline" size={18} color="#0ea5e9" style={{marginTop: 4, marginRight: 10}} />
-                        <Text style={styles.paragraphBullet}>{doc}</Text>
-                    </View>
+                {law.documentsNeeded.map((doc: string, i: number) => (
+                    <DocumentAccordion key={i} documentName={doc} />
                 ))}
             </>
             )}
@@ -107,4 +117,6 @@ const styles = StyleSheet.create({
   durationText: { color: '#0369a1', fontWeight: '600', marginLeft: 12, fontSize: 15, flexShrink: 1, lineHeight: 22 },
   whereBox: { flexDirection: 'row', backgroundColor: '#ecfdf5', padding: 16, borderRadius: 12, alignItems: 'flex-start', borderLeftWidth: 4, borderLeftColor: '#10b981', marginBottom: 20 },
   whereText: { color: '#047857', fontWeight: '600', marginLeft: 12, fontSize: 15, flexShrink: 1, lineHeight: 22 },
+  center: { justifyContent: 'center', alignItems: 'center' },
+  loadingText: { marginTop: 16, fontSize: 16, color: '#0f4c81', fontWeight: '600' }
 });

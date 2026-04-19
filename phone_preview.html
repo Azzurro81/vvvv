@@ -1,0 +1,2297 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfoStranieri â€” Phone Preview</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        /* ===== PHONE FRAME ===== */
+        .phone-outer {
+            position: relative;
+            width: 390px;
+            height: 844px;
+            background: #1a1a1a;
+            border-radius: 55px;
+            padding: 12px;
+            box-shadow:
+                0 0 0 2px #333,
+                0 0 0 4px #1a1a1a,
+                0 50px 100px rgba(0,0,0,0.5),
+                inset 0 0 10px rgba(255,255,255,0.05);
+        }
+        .phone-outer::before {
+            content: '';
+            position: absolute;
+            top: 0; right: -3px;
+            width: 4px; height: 100px;
+            background: #2a2a2a;
+            border-radius: 0 4px 4px 0;
+            top: 180px;
+        }
+        .phone-outer::after {
+            content: '';
+            position: absolute;
+            top: 120px; left: -3px;
+            width: 4px; height: 35px;
+            background: #2a2a2a;
+            border-radius: 4px 0 0 4px;
+            box-shadow: 0 50px 0 #2a2a2a, 0 90px 0 #2a2a2a;
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: #f8fafc;
+            border-radius: 44px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== NOTCH (Dynamic Island) ===== */
+        .notch-bar {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 126px;
+            height: 36px;
+            background: #000;
+            border-radius: 20px;
+            z-index: 100;
+        }
+
+        /* ===== STATUS BAR ===== */
+        .status-bar {
+            height: 54px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 0 28px 6px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            background: transparent;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            box-sizing: border-box;
+            z-index: 50;
+        }
+        .status-bar .time { font-weight: 700; }
+        .status-bar .icons { display: flex; gap: 5px; align-items: center; font-size: 13px; }
+
+        /* ===== SIDEBAR MENU ===== */
+        .sidebar {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 80%;
+            height: 100%;
+            background: #fff;
+            z-index: 1000;
+            transition: left 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            padding: 30px 20px;
+        }
+        .sidebar.active {
+            left: 0;
+        }
+        .sidebar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: 999;
+            display: none;
+            backdrop-filter: blur(4px);
+        }
+        .sidebar-overlay.active {
+            display: block;
+        }
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            margin-left: -20px;
+            margin-right: -20px;
+            margin-top: -30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .sidebar-header h2 {
+            font-size: 20px;
+            font-weight: 800;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+        .sidebar-close {
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+        }
+        .sidebar-menu-item {
+            padding: 16px 0;
+            font-size: 15px;
+            font-weight: 700;
+            color: #334155;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: all 0.2s;
+            font-family: 'Outfit', sans-serif;
+        }
+        .sidebar-menu-item:hover {
+            color: #1e40af;
+            padding-left: 5px;
+        }
+        .sidebar-menu-item i {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(30, 64, 175, 0.1);
+            border-radius: 6px;
+            font-size: 14px;
+            color: #1e40af;
+        }
+
+        /* ===== SIDEBAR ALTRO (RIGHT) ===== */
+        .sidebar-right {
+            position: absolute;
+            top: 0;
+            right: -100%;
+            width: 80%;
+            height: 100%;
+            background: #fff;
+            z-index: 1000;
+            transition: right 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            padding: 30px 20px;
+        }
+        .sidebar-right.active {
+            right: 0;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Outfit:wght@600;800;900&family=Inter:wght@400;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+
+        /* ===== CHAT SCREEN ===== */
+        .chat-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #f8fafc;
+        }
+        .chat-message {
+            display: flex;
+            gap: 10px;
+            max-width: 85%;
+            animation: chatFadeIn 0.3s ease;
+        }
+        @keyframes chatFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .chat-message.sent {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+        .chat-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: 2px solid #e2e8f0;
+        }
+        .chat-bubble {
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            line-height: 1.5;
+            color: #334155;
+            position: relative;
+        }
+        .chat-message:not(.sent) .chat-bubble {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-top-left-radius: 4px;
+        }
+        .chat-message.sent .chat-bubble {
+            background: #1e40af;
+            color: #fff;
+            border-top-right-radius: 4px;
+        }
+        .chat-sender {
+            font-size: 11px;
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 3px;
+            font-family: 'Outfit', sans-serif;
+        }
+        .chat-message.sent .chat-sender {
+            color: rgba(255,255,255,0.7);
+            text-align: right;
+        }
+        .chat-time {
+            font-size: 10px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+        .chat-message.sent .chat-time {
+            color: rgba(255,255,255,0.5);
+            text-align: right;
+        }
+        .chat-input-bar {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            gap: 10px;
+            background: #fff;
+            border-top: 1px solid #e2e8f0;
+            flex-shrink: 0;
+        }
+        .chat-input-bar input {
+            flex: 1;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            background: #f8fafc;
+            transition: border-color 0.2s;
+        }
+        .chat-input-bar input:focus {
+            border-color: #1e40af;
+        }
+        .chat-send-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #1e40af;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.2s;
+            border: none;
+            font-size: 16px;
+        }
+        .chat-send-btn:active {
+            transform: scale(0.9);
+            background: #1e3a8a;
+        }
+        .chat-guest-block {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 30px;
+            text-align: center;
+            gap: 20px;
+        }
+        .chat-guest-block .lock-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(30, 64, 175, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            color: #1e40af;
+        }
+        .chat-guest-block h3 {
+            font-size: 20px;
+            font-weight: 800;
+            color: #0f172a;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+        }
+        .chat-guest-block p {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.6;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+        }
+        .chat-register-btn {
+            padding: 12px 32px;
+            background: #1e40af;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+        }
+        .chat-register-btn:active {
+            transform: scale(0.95);
+            background: #1e3a8a;
+        }
+        .chat-date-divider {
+            text-align: center;
+            font-size: 11px;
+            color: #94a3b8;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            padding: 8px 0;
+        }
+        .chat-online-count {
+            font-size: 12px;
+            color: #22c55e;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .chat-online-count .dot {
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* ===== APP HEADER (Realistic Photo + 3D Text) ===== */
+        .app-header {
+            background: linear-gradient(90deg, #0a2540 0%, rgba(10, 37, 64, 0.9) 45%, rgba(10, 37, 64, 0) 100%),
+                        url('https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1000&auto=format&fit=crop') no-repeat right 75%;
+            background-size: cover;
+            height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            border-bottom-left-radius: 35px;
+            border-bottom-right-radius: 35px;
+            position: relative;
+            margin-bottom: 0px; /* Rimosso spazio bianco tra testata e contenuto */
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(10, 37, 64, 0.4);
+            flex-shrink: 0;
+            border: none;
+            padding: 25px 24px 20px; /* Ridotto il padding superiore per spostare tutto in alto */
+            width: 101%;
+            left: -0.5%;
+        }
+        .profile-container {
+            width: 60px; /* Ingrandita come richiesto */
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            overflow: hidden;
+            margin-bottom: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .profile-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .header-title-3d {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 26px;
+            font-weight: 900;
+            line-height: 1.1;
+            text-transform: uppercase;
+            background: linear-gradient(to bottom, #ffffff 0%, #b0c4de 50%, #4682b4 51%, #00f3ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0px 4px 2px rgba(0,0,0,0.8)) drop-shadow(0px 0px 10px rgba(0,243,255,0.4));
+            width: 65%;
+            position: relative;
+            z-index: 10;
+        }
+        .header-title-3d span {
+            display: block;
+            font-size: 11px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            letter-spacing: 2px;
+            -webkit-text-fill-color: #ff007f;
+            background: none;
+            margin-bottom: 5px;
+            text-shadow: 0 0 8px rgba(255,0,127,0.6);
+        }
+        /* ===== SEARCH BAR REMOVED ===== */
+        .search-bar-floating { display: none; }
+
+        /* ===== SUB HEADER HIDDEN (Using Search Bar) ===== */
+        .sub-header { display: none; }
+
+        /* ===== INNER HEADER (Premium Dark Theme) ===== */
+        .inner-header {
+            background: linear-gradient(135deg, #0a2540 0%, #162a45 100%);
+            padding: 45px 24px 35px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-shrink: 0;
+            border-bottom-left-radius: 35px;
+            border-bottom-right-radius: 35px;
+            border-top-left-radius: 44px;
+            border-top-right-radius: 44px;
+            position: relative;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(10, 37, 64, 0.2);
+            width: 101%;
+            left: -0.5%;
+        }
+        .inner-header .back-btn {
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255,255,255,0.15);
+            border-radius: 50%;
+        }
+        .inner-header .inner-title {
+            color: #fff;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+        }
+
+        /* ===== SCROLLABLE BODY (Glass Effect) ===== */
+        .scroll-body {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            position: relative;
+            z-index: 5;
+        }
+        .scroll-body::-webkit-scrollbar { width: 0; }
+
+        /* Background Blobs */
+        .glass-blob {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: 1;
+            opacity: 0.5;
+        }
+        .blob-1 { background: #6F00FF; top: 10%; left: -50px; }
+        .blob-2 { background: #FF8C00; bottom: 10%; right: -50px; }
+        .blob-3 { background: #FF0080; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 200px; height: 200px; }
+
+        .festivals-container {
+            margin-top: 0;
+            position: relative;
+            z-index: 10;
+        }
+        .menu-btn {
+            position: absolute;
+            left: 15px;
+            top: 10px;
+            padding: 4px 10px;
+            background: #1e40af; /* Blu più vivace */
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            z-index: 30;
+            transition: all 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .altro-btn {
+            position: absolute;
+            right: 15px;
+            top: 10px;
+            padding: 4px 10px;
+            background: #1e40af; /* Blu più vivace */
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            z-index: 30;
+            transition: all 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .menu-btn:hover, .altro-btn:hover {
+            background: #1e3a8a;
+            transform: translateY(-1px);
+        }
+        .festivals-section-title {
+            text-align: center;
+            font-size: 13px; /* Ridotto font size */
+            font-weight: 700;
+            color: #475569; /* Colore più sobrio */
+            padding: 10px 16px 5px;
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: 0.3px;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        .festivals-row {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px 5px 25px; /* Aumentato il padding superiore per abbassare le bandiere */
+            gap: 6px;
+            width: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+        
+        .festival-bubble {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: fit-content;
+            min-width: 60px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            background: linear-gradient(135deg, #0077BE 0%, #0047AB 100%);
+            padding: 10px 8px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 71, 171, 0.25);
+            text-align: center;
+        }
+        .festival-bubble:hover { transform: scale(1.05); }
+        .festival-bubble.large { width: 76px; }
+        .bubble-country {
+            font-size: 8px; font-weight: 700;
+            color: #64748b; text-transform: uppercase;
+            letter-spacing: 1px; margin-bottom: 3px;
+        }
+        .festival-bubble.large .bubble-country {
+            font-size: 9px; color: #0a3d66; font-weight: 800;
+        }
+        .bubble-flag-wrap {
+            width: 38px; height: 38px;
+            border-radius: 50%; overflow: hidden;
+            border: 1.5px solid #e2e8f0;
+            position: relative;
+            background: #fff;
+        }
+        .festival-bubble.large .bubble-flag-wrap {
+            width: 50px; height: 50px;
+            border-color: #0f4c81;
+        }
+        .bubble-flag-wrap img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+        .bubble-flag-wrap .glass-highlight {
+            position: absolute;
+            top: 2px; left: 15%; width: 70%; height: 35%;
+            background: rgba(255,255,255,0.4);
+            border-radius: 50px 50px 100px 100px;
+        }
+        .bubble-country {
+            font-size: 9px; font-weight: 800;
+            color: #ffffff !important; text-transform: uppercase;
+            letter-spacing: 0.5px; margin-bottom: 4px;
+        }
+        .bubble-fest-name {
+            font-size: 9px;
+            font-weight: 700;
+            color: #FFD700 !important;
+            text-align: center;
+            margin-top: 4px;
+            margin-bottom: 2px;
+            line-height: 1.1;
+        }
+        .bubble-date-badge {
+            background: transparent;
+            padding: 0;
+            font-size: 8px; font-weight: 700;
+            color: rgba(255,255,255,0.7); text-transform: uppercase;
+        }
+        .festival-bubble.large .bubble-date-badge {
+            background: #FF8C00; border-color: #FF8C00; color: #fff;
+            padding: 2px 8px;
+        }
+
+        /* ===== SERVICES GRID (Home) ===== */
+        .services-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 0 16px 20px;
+        }
+        .service-card {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 24px;
+            padding: 25px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            position: relative;
+            z-index: 10;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        }
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(108, 45, 185, 0.12);
+        }
+        .icon-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+        .icon-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transform: scale(1.1);
+        }
+        .icon-circle i {
+            font-size: 24px;
+            color: #6C2DB9;
+        }
+        .service-card .card-label {
+            font-size: 13px;
+            font-weight: 800;
+            color: #1A0B2E;
+            text-align: center;
+            line-height: 1.2;
+        }
+        .badge-new {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: #FF8C00;
+            color: #fff;
+            font-size: 8px;
+            font-weight: 900;
+            padding: 2px 7px;
+            border-radius: 10px;
+        }
+
+        /* ===== NEWS SECTION ===== */
+        .news-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px 10px;
+        }
+        .news-header h3 {
+            font-size: 18px;
+            font-weight: 800;
+            color: #5D2A8E;
+        }
+        .news-header .see-all {
+            font-size: 13px;
+            font-weight: 700;
+            color: #FF8C00;
+            cursor: pointer;
+        }
+        .news-item {
+            background: #ffffff;
+            margin: 0 16px 12px;
+            padding: 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(10, 37, 64, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(10, 37, 64, 0.03);
+        }
+        .news-item:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 20px rgba(10, 37, 64, 0.08);
+            border-color: rgba(108, 45, 185, 0.1);
+        }
+        .news-tag {
+            background: #f1f5f9;
+            color: #0a2540;
+            font-size: 9px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-bottom: 6px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+        .news-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0a2540;
+            line-height: 1.3;
+        }
+        .news-date {
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* ===== BOTTOM TAB BAR ===== */
+        .tab-bar {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            height: 70px;
+            background: #fff;
+            border-top: 1px solid #e2e8f0;
+            padding-bottom: 16px;
+            flex-shrink: 0;
+        }
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: color 0.2s;
+        }
+        .tab-item.active { color: #5D2A8E; }
+        .tab-item i { font-size: 22px; }
+        .tab-item span { font-size: 10px; font-weight: 700; }
+
+        /* ===== CATEGORY GRID (folders) ===== */
+        .category-section-title {
+            text-align: center;
+            font-size: 16px;
+            font-weight: 800;
+            color: #0a2540;
+            padding: 22px 16px 18px;
+            letter-spacing: 0.3px;
+        }
+        .category-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            padding: 0 20px 30px;
+        }
+        .category-card {
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 25px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid rgba(108, 45, 185, 0.05);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 10px 20px rgba(10, 37, 64, 0.04);
+        }
+        .category-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(10, 37, 64, 0.1);
+            border-color: rgba(108, 45, 185, 0.2);
+        }
+        .category-card:active { transform: scale(0.96); }
+        .category-card .icon-circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 22px;
+            background: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.02);
+        }
+        .category-card i {
+            font-size: 32px;
+            background: linear-gradient(135deg, #0a2540 0%, #6C2DB9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .category-card span {
+            font-size: 14px;
+            font-weight: 800;
+            color: #0a2540;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        /* ===== LAW LIST ===== */
+        /* ===== LAW LIST ===== */
+        .law-card {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 18px;
+            margin: 0 16px 14px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border: 1px solid rgba(10, 37, 64, 0.05);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(10, 37, 64, 0.03);
+            cursor: pointer;
+        }
+        .law-card:hover { 
+            transform: translateX(6px); 
+            box-shadow: 0 10px 25px rgba(10, 37, 64, 0.08);
+            border-color: rgba(108, 45, 185, 0.15);
+        }
+        .law-card.unread {
+            background: #ffffff;
+        }
+        .law-icon-wrap {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: #f1f5f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #0a2540;
+            font-size: 18px;
+            flex-shrink: 0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .law-card.unread .law-icon-wrap {
+            background: linear-gradient(135deg, #0a2540 0%, #6C2DB9 100%);
+            color: #fff;
+            box-shadow: 0 5px 15px rgba(10, 37, 64, 0.2);
+        }
+        .law-card-content { flex: 1; }
+        .law-card-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #0a2540;
+            margin-bottom: 3px;
+            line-height: 1.2;
+        }
+        .law-card-ref {
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .law-card .chevron {
+            color: #cbd5e1;
+            font-size: 14px;
+        }
+
+        /* ===== LAW DETAIL ===== */
+        .detail-content { padding: 20px; background: #fff; }
+        .detail-banner {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #ef4444;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 900;
+            padding: 4px 12px;
+            border-radius: 14px;
+            margin-bottom: 14px;
+        }
+        .detail-title {
+            font-size: 24px;
+            font-weight: 900;
+            color: #1A0B2E;
+            line-height: 1.25;
+            margin-bottom: 16px;
+        }
+        .detail-ref-box {
+            background: #e0f2fe;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border-left: 4px solid #0369a1;
+            color: #0369a1;
+            font-weight: 700;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .detail-section-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 20px 0 10px;
+        }
+        .detail-text {
+            font-size: 14px;
+            color: #334155;
+            line-height: 1.6;
+        }
+        .detail-bullet {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #334155;
+            line-height: 1.4;
+        }
+        .detail-bullet .dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #0ea5e9;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+        .detail-info-box {
+            background: #f0fdf4;
+            border-left: 4px solid #10b981;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        .detail-info-box .label {
+            font-size: 11px; font-weight: 800;
+            color: #065f46; text-transform: uppercase;
+            letter-spacing: 0.5px; margin-bottom: 4px;
+        }
+        .detail-info-box .value {
+            font-size: 13px; font-weight: 600; color: #047857;
+        }
+        .detail-where-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .detail-where-box .label {
+            font-size: 11px; font-weight: 800;
+            color: #92400e; text-transform: uppercase;
+            letter-spacing: 0.5px; margin-bottom: 4px;
+        }
+        .detail-where-box .value {
+            font-size: 13px; font-weight: 600; color: #b45309;
+        }
+
+        /* ===== SCREEN TRANSITIONS ===== */
+        .screen { display: none; flex-direction: column; height: 100%; }
+        .screen.active { display: flex; animation: slideIn 0.25s ease-out; }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slideBack {
+            from { opacity: 0; transform: translateX(-40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .screen.back-anim { animation: slideBack 0.25s ease-out; }
+
+        /* ===== TITLE OUTSIDE PHONE ===== */
+        .page-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+        .app-badge {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 12px 32px;
+            border-radius: 60px;
+            text-align: center;
+        }
+        .app-badge h1 {
+            font-size: 28px;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+        .app-badge p {
+            font-size: 13px;
+            color: rgba(255,255,255,0.6);
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        /* Home indicator bar */
+        .home-indicator {
+            width: 134px;
+            height: 5px;
+            background: #1e293b;
+            border-radius: 3px;
+            margin: 0 auto;
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 200;
+        }
+
+        /* ===== PROMEMORIA CHIAMATA ===== */
+        .reminder-form { padding: 20px; }
+        .reminder-form label { display: block; font-size: 12px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; margin-top: 16px; font-family: 'Outfit', sans-serif; }
+        .reminder-form label:first-child { margin-top: 0; }
+        .reminder-form input, .reminder-form textarea, .reminder-form select {
+            width: 100%; padding: 14px 16px; border: 1.5px solid #e2e8f0; border-radius: 14px; font-size: 15px;
+            font-family: 'Inter', sans-serif; color: #1e293b; background: #f8fafc; outline: none; box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        .reminder-form input:focus, .reminder-form textarea:focus, .reminder-form select:focus { border-color: #1e40af; background: #fff; }
+        .reminder-form textarea { resize: none; height: 80px; }
+        .reminder-form select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; }
+        .reminder-save-btn {
+            width: 100%; padding: 16px; background: linear-gradient(135deg, #1e40af 0%, #0f4c81 100%); color: #fff;
+            border: none; border-radius: 16px; font-size: 16px; font-weight: 800; font-family: 'Outfit', sans-serif;
+            cursor: pointer; margin-top: 24px; letter-spacing: 0.5px; transition: all 0.2s;
+            box-shadow: 0 8px 20px rgba(30, 64, 175, 0.3);
+        }
+        .reminder-save-btn:active { transform: scale(0.97); }
+        .reminder-card {
+            background: #fff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 16px; margin-bottom: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03); position: relative; transition: all 0.2s;
+        }
+        .reminder-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
+        .reminder-card .rc-title { font-size: 16px; font-weight: 800; color: #0f172a; font-family: 'Outfit', sans-serif; margin-bottom: 6px; }
+        .reminder-card .rc-detail { font-size: 13px; color: #64748b; display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+        .reminder-card .rc-detail i { font-size: 13px; color: #94a3b8; width: 16px; text-align: center; }
+        .reminder-card .rc-msg { font-size: 13px; color: #334155; font-style: italic; background: #f1f5f9; padding: 10px 12px; border-radius: 10px; margin-top: 8px; line-height: 1.4; }
+        .reminder-card .rc-actions { display: flex; gap: 8px; margin-top: 12px; }
+        .reminder-card .rc-btn { flex: 1; padding: 10px; border: none; border-radius: 12px; font-size: 13px; font-weight: 700; font-family: 'Outfit', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
+        .rc-btn-call { background: #10b981; color: #fff; }
+        .rc-btn-call:active { background: #059669; }
+        .rc-btn-delete { background: #fee2e2; color: #ef4444; }
+        .rc-btn-delete:active { background: #fecaca; }
+        .reminder-empty { text-align: center; padding: 60px 30px; }
+        .reminder-empty i { font-size: 48px; color: #cbd5e1; margin-bottom: 16px; }
+        .reminder-empty p { font-size: 15px; color: #94a3b8; font-weight: 600; line-height: 1.5; }
+        .reminder-fab {
+            position: absolute; right: 20px; bottom: 80px; width: 56px; height: 56px; border-radius: 28px;
+            background: linear-gradient(135deg, #1e40af 0%, #0f4c81 100%); color: #fff; border: none;
+            font-size: 28px; cursor: pointer; display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 8px 25px rgba(30, 64, 175, 0.4); z-index: 50; transition: all 0.2s;
+        }
+        .reminder-fab:active { transform: scale(0.9); }
+
+        /* ===== VIRTUAL CALL OVERLAY ===== */
+        .vcall-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2000;
+            background: linear-gradient(180deg, #0a1628 0%, #0f4c81 50%, #1e40af 100%);
+            display: none; flex-direction: column; justify-content: space-between; align-items: center;
+            padding: 60px 30px 40px; animation: vcallFadeIn 0.5s ease;
+        }
+        .vcall-overlay.active { display: flex; }
+        @keyframes vcallFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .vcall-avatar-ring {
+            width: 120px; height: 120px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.3);
+            display: flex; justify-content: center; align-items: center;
+            background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+            animation: vcallPulse 2s infinite;
+        }
+        @keyframes vcallPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.3); }
+            50% { box-shadow: 0 0 0 20px rgba(255,255,255,0); }
+        }
+        .vcall-avatar-ring i { font-size: 50px; color: #fff; }
+        .vcall-caller { font-size: 24px; font-weight: 900; color: #fff; margin-top: 20px; font-family: 'Outfit', sans-serif; text-align: center; }
+        .vcall-status { font-size: 15px; color: rgba(255,255,255,0.6); font-weight: 600; margin-top: 6px; }
+        .vcall-message-box {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: 20px;
+            padding: 20px; margin: 20px 0; width: 100%; backdrop-filter: blur(5px); display: none;
+        }
+        .vcall-message-box.active { display: block; animation: vcallFadeIn 0.5s ease; }
+        .vcall-msg-label { font-size: 10px; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; }
+        .vcall-msg-text { font-size: 15px; color: #fff; line-height: 1.6; font-weight: 500; font-style: italic; }
+        .vcall-wave { display: flex; align-items: center; justify-content: center; gap: 3px; margin-top: 14px; height: 30px; }
+        .vcall-wave .bar { width: 4px; border-radius: 2px; background: #0ea5e9; animation: waveAnim 0.8s ease-in-out infinite alternate; }
+        .vcall-wave .bar:nth-child(1) { animation-delay: 0s; }
+        .vcall-wave .bar:nth-child(2) { animation-delay: 0.1s; }
+        .vcall-wave .bar:nth-child(3) { animation-delay: 0.2s; }
+        .vcall-wave .bar:nth-child(4) { animation-delay: 0.3s; }
+        .vcall-wave .bar:nth-child(5) { animation-delay: 0.15s; }
+        .vcall-wave .bar:nth-child(6) { animation-delay: 0.25s; }
+        .vcall-wave .bar:nth-child(7) { animation-delay: 0.05s; }
+        @keyframes waveAnim { from { height: 6px; } to { height: 28px; } }
+        .vcall-buttons { display: flex; gap: 40px; }
+        .vcall-btn { width: 70px; height: 70px; border-radius: 50%; border: none; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; transition: all 0.2s; }
+        .vcall-btn i { font-size: 28px; color: #fff; }
+        .vcall-btn span { font-size: 10px; color: #fff; font-weight: 700; }
+        .vcall-btn-accept { background: #22c55e; box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4); }
+        .vcall-btn-accept:active { transform: scale(0.9); }
+        .vcall-btn-decline { background: #ef4444; box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4); }
+        .vcall-btn-decline:active { transform: scale(0.9); }
+        .vcall-btn-hangup { background: #ef4444; box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4); }
+        .vcall-timer { font-size: 18px; color: rgba(255,255,255,0.8); font-weight: 700; font-family: 'Inter', monospace; margin-top: 8px; }
+    </style>
+</head>
+<body>
+
+<div class="page-wrapper">
+    <div class="app-badge">
+        <h1>ðŸ“± InfoStranieri</h1>
+        <p>Preview Interattivo â€” Tocca per navigare</p>
+    </div>
+
+    <div class="phone-outer">
+        <div class="phone-screen">
+            <!-- Fotocamera (notch) rimossa come richiesto -->
+
+            <!-- ============ SCREEN: HOME ============ -->
+            <div class="screen active" id="screen-home">
+                <!-- Sidebar Menu -->
+                <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMenu()"></div>
+                    <div class="sidebar" id="sidebar-menu">
+                        <div class="sidebar-header">
+                            <h2>MENU</h2>
+                            <div class="sidebar-close" onclick="closeMenu()">&times;</div>
+                        </div>
+                        <div class="sidebar-menu-item" onclick="navigateToCategory('asilo')"><i class="fas fa-shield-halved"></i> Asilo</div>
+                        <div class="sidebar-menu-item" onclick="navigateToCategory('permesso')"><i class="fas fa-id-card"></i> Permesso di Soggiorno</div>
+                        <div class="sidebar-menu-item" onclick="navigateToCategory('carta')"><i class="fas fa-address-card"></i> Carta di Soggiorno</div>
+                        <div class="sidebar-menu-item" onclick="navigateToCategory('cittadinanza')"><i class="fas fa-passport"></i> Cittadinanza</div>
+                        <div class="sidebar-menu-item" onclick="navigateToCategory('burocrazia')"><i class="fas fa-laptop-code"></i> Burocrazia Digitale</div>
+                        <div class="sidebar-menu-item" onclick="navigateToCategory('sanita')"><i class="fas fa-heart-pulse"></i> Sanità</div>
+                        <div class="sidebar-menu-item" onclick="navigateToCategory('lavoro')"><i class="fas fa-briefcase"></i> Lavoro</div>
+                        <div class="sidebar-menu-item" onclick="navigateToCategory('disabili')"><i class="fas fa-wheelchair"></i> Disabili</div>
+                        <div class="sidebar-menu-item" onclick="navigateToCategory('kit')"><i class="fas fa-folder-open"></i> Compilazione Kit</div>
+                        <div class="sidebar-menu-item" onclick="navigateToCategory('famiglia')"><i class="fas fa-users"></i> Famiglia</div>
+                        <div class="sidebar-menu-item" onclick="navigateToCategory('bonus')"><i class="fas fa-hand-holding-dollar"></i> Bonus</div>
+                    </div>
+
+                    <div class="sidebar-right" id="sidebar-altro">
+                        <div class="sidebar-header">
+                            <h2>ALTRO</h2>
+                            <div class="sidebar-close" onclick="closeAltro()">&times;</div>
+                        </div>
+                        <div class="sidebar-menu-item" onclick="openOfferte()"><i class="fas fa-briefcase"></i> Offerte di Lavoro</div>
+                        <div class="sidebar-menu-item" onclick="closeAltro()"><i class="fas fa-magnifying-glass"></i> Cerco Lavoro</div>
+                        <div class="sidebar-menu-item" onclick="openChat()"><i class="fas fa-comments"></i> Chat</div>
+                        <div class="sidebar-menu-item" onclick="openPromemoria()"><i class="fas fa-phone"></i> Promemoria Chiamata</div>
+                    </div>
+
+                <!-- Barra di stato e notch rimossi come richiesto -->
+                <div class="app-header">
+                    <div class="profile-container">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop" alt="Profile">
+                    </div>
+                    <div class="header-title-3d">
+                        <span>BENVENUTO IN</span>
+                        Info<br>Stranieri
+                    </div>
+                </div>
+                <div class="scroll-body" id="home-scroll">
+                    <!-- Blobs for Glass Effect -->
+                    <div class="glass-blob blob-1"></div>
+                    <div class="glass-blob blob-2"></div>
+                    <div class="glass-blob blob-3"></div>
+
+                    <div style="position:relative; z-index:10;">
+                        <div class="menu-btn" onclick="openMenu()">
+                            <i class="fas fa-bars"></i> MENU
+                        </div>
+                        <div class="altro-btn" onclick="openAltro()">
+                            ALTRO <i class="fas fa-ellipsis-v"></i>
+                        </div>
+                        <div class="festivals-container">
+                            <div class="festivals-section-title">Feste nel Mondo</div>
+                            <div class="festivals-row" id="festivals-row"></div>
+                        </div>
+
+                        <div class="services-grid" id="services-grid"></div>
+
+                        <div class="news-header">
+                            <h3>Ultime Novità</h3>
+                            <span class="see-all">Vedi tutte</span>
+                        </div>
+                        <div id="news-list"></div>
+                        <div style="height:20px;"></div>
+                    </div>
+                </div>
+                <div class="tab-bar">
+                    <div class="tab-item active"><i class="fas fa-home"></i><span>Home</span></div>
+                    <div class="tab-item"><i class="fas fa-robot"></i><span>Bot</span></div>
+                    <div class="tab-item"><i class="fas fa-user"></i><span>Profilo</span></div>
+                </div>
+            </div>
+
+            <!-- ============ SCREEN: CATEGORIES ============ -->
+            <div class="screen" id="screen-categories">
+                <!-- Status bar rimossa come richiesto -->
+                <div class="inner-header">
+                    <div class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></div>
+                    <span class="inner-title" id="cat-screen-title">Asilo</span>
+                    <div class="search-bar-floating" style="bottom:-20px;">
+                        <i class="fas fa-search"></i>
+                        <span id="cat-search-placeholder">Cerca in questa sezione...</span>
+                    </div>
+                </div>
+                <div class="scroll-body">
+                    <div class="category-section-title" id="cat-section-subtitle">Scegli la tipologia</div>
+                    <div class="category-grid" id="category-grid"></div>
+                </div>
+                <div class="tab-bar">
+                    <div class="tab-item active"><i class="fas fa-home"></i><span>Home</span></div>
+                    <div class="tab-item"><i class="fas fa-robot"></i><span>Bot</span></div>
+                    <div class="tab-item"><i class="fas fa-user"></i><span>Profilo</span></div>
+                </div>
+            </div>
+
+            <!-- ============ SCREEN: LAW LIST ============ -->
+            <div class="screen" id="screen-laws">
+                <!-- Status bar rimossa come richiesto -->
+                <div class="inner-header">
+                    <div class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></div>
+                    <span class="inner-title" id="laws-screen-title">Leggi</span>
+                    <div class="search-bar-floating" style="bottom:-20px;">
+                        <i class="fas fa-search"></i>
+                        <span>Cerca legge...</span>
+                    </div>
+                </div>
+                <div class="scroll-body" style="padding-top:14px;">
+                    <div id="laws-list"></div>
+                </div>
+                <div class="tab-bar">
+                    <div class="tab-item active"><i class="fas fa-home"></i><span>Home</span></div>
+                    <div class="tab-item"><i class="fas fa-robot"></i><span>Bot</span></div>
+                    <div class="tab-item"><i class="fas fa-user"></i><span>Profilo</span></div>
+                </div>
+            </div>
+
+            <!-- ============ SCREEN: LAW DETAIL ============ -->
+            <div class="screen" id="screen-detail">
+                <!-- Status bar rimossa come richiesto -->
+                <div class="inner-header">
+                    <div class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></div>
+                    <span class="inner-title">Dettaglio</span>
+                </div>
+                <div class="scroll-body">
+                    <div class="detail-content" id="detail-content"></div>
+                </div>
+                <div class="tab-bar">
+                    <div class="tab-item active"><i class="fas fa-home"></i><span>Home</span></div>
+                    <div class="tab-item"><i class="fas fa-robot"></i><span>Bot</span></div>
+                    <div class="tab-item"><i class="fas fa-user"></i><span>Profilo</span></div>
+                </div>
+            </div>
+
+            <!-- ============ SCREEN: CHAT ============ -->
+            <div class="screen" id="screen-chat">
+                <div class="inner-header">
+                    <div class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></div>
+                    <span class="inner-title"><i class="fas fa-comments" style="margin-right:8px;"></i>Chat Community</span>
+                    <div class="chat-online-count" style="position:absolute;right:15px;bottom:12px;"><div class="dot"></div> 12 online</div>
+                </div>
+                <div class="chat-body" id="chat-body"></div>
+                <div class="chat-input-bar" id="chat-input-bar">
+                    <input type="text" id="chat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendMessage()">
+                    <button class="chat-send-btn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+                </div>
+                <div class="tab-bar">
+                    <div class="tab-item active"><i class="fas fa-home"></i><span>Home</span></div>
+                    <div class="tab-item"><i class="fas fa-robot"></i><span>Bot</span></div>
+                    <div class="tab-item"><i class="fas fa-user"></i><span>Profilo</span></div>
+                </div>
+            </div>
+
+            <!-- ============ SCREEN: OFFERTE LAVORO ============ -->
+            <div class="screen" id="screen-offerte">
+                <div class="inner-header">
+                    <div class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></div>
+                    <span class="inner-title"><i class="fas fa-briefcase" style="margin-right:8px;"></i>Offerte di Lavoro</span>
+                </div>
+                <div class="scroll-body" style="padding:15px;">
+                    <button class="chat-register-btn" style="width:100%;margin-bottom:15px;" onclick="addJobOffer()"><i class="fas fa-plus" style="margin-right:8px;"></i>Pubblica Annuncio</button>
+                    <div id="job-list"></div>
+                </div>
+                <div class="tab-bar">
+                    <div class="tab-item active"><i class="fas fa-home"></i><span>Home</span></div>
+                    <div class="tab-item"><i class="fas fa-robot"></i><span>Bot</span></div>
+                    <div class="tab-item"><i class="fas fa-user"></i><span>Profilo</span></div>
+                </div>
+            </div>
+
+            <!-- ============ SCREEN: PROMEMORIA CHIAMATA ============ -->
+            <div class="screen" id="screen-promemoria">
+                <div class="inner-header">
+                    <div class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></div>
+                    <span class="inner-title"><i class="fas fa-phone" style="margin-right:8px;"></i>Promemoria Chiamata</span>
+                </div>
+                <div class="scroll-body" style="padding:0;" id="promemoria-body">
+                    <!-- Filled by JS -->
+                </div>
+                <button class="reminder-fab" onclick="showAddReminder()" id="promemoria-fab"><i class="fas fa-plus"></i></button>
+                <div class="tab-bar">
+                    <div class="tab-item active"><i class="fas fa-home"></i><span>Home</span></div>
+                    <div class="tab-item"><i class="fas fa-robot"></i><span>Bot</span></div>
+                    <div class="tab-item"><i class="fas fa-user"></i><span>Profilo</span></div>
+                </div>
+            </div>
+
+            <!-- ============ SCREEN: AGGIUNGI PROMEMORIA ============ -->
+            <div class="screen" id="screen-add-reminder">
+                <div class="inner-header">
+                    <div class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></div>
+                    <span class="inner-title">Nuovo Promemoria</span>
+                </div>
+                <div class="scroll-body">
+                    <div class="reminder-form" id="reminder-form">
+                        <label><i class="fas fa-calendar" style="margin-right:6px;color:#1e40af;"></i> Data Appuntamento</label>
+                        <input type="date" id="rem-date">
+
+                        <label><i class="fas fa-clock" style="margin-right:6px;color:#1e40af;"></i> Orario</label>
+                        <input type="time" id="rem-time">
+
+                        <label><i class="fas fa-pen" style="margin-right:6px;color:#1e40af;"></i> Motivo dell'appuntamento</label>
+                        <textarea id="rem-message" placeholder="Es: Rinnovo permesso in Questura, portare documenti..."></textarea>
+
+                        <label><i class="fas fa-location-dot" style="margin-right:6px;color:#1e40af;"></i> Dove</label>
+                        <input type="text" id="rem-location" placeholder="Es: Questura di Roma, Via...">
+
+                        <label><i class="fas fa-bell" style="margin-right:6px;color:#f59e0b;"></i> Quando vuoi essere chiamato?</label>
+                        <select id="rem-advance">
+                            <option value="10">10 minuti prima</option>
+                            <option value="30" selected>30 minuti prima</option>
+                            <option value="60">1 ora prima</option>
+                            <option value="120">2 ore prima</option>
+                            <option value="1440">1 giorno prima</option>
+                        </select>
+
+                        <button class="reminder-save-btn" onclick="saveReminder()">
+                            <i class="fas fa-check" style="margin-right:8px;"></i> Salva Promemoria
+                        </button>
+                    </div>
+                </div>
+                <div class="tab-bar">
+                    <div class="tab-item active"><i class="fas fa-home"></i><span>Home</span></div>
+                    <div class="tab-item"><i class="fas fa-robot"></i><span>Bot</span></div>
+                    <div class="tab-item"><i class="fas fa-user"></i><span>Profilo</span></div>
+                </div>
+            </div>
+
+            <!-- ============ SCREEN: FESTIVAL DETAIL ============ -->
+            <div class="screen" id="screen-festival">
+                <div class="inner-header" id="festival-header">
+                    <div class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></div>
+                    <span class="inner-title" id="festival-screen-title">Festa</span>
+                </div>
+                <div class="scroll-body" id="festival-detail-body">
+                    <!-- Filled by JS -->
+                </div>
+                <div class="tab-bar">
+                    <div class="tab-item active"><i class="fas fa-home"></i><span>Home</span></div>
+                    <div class="tab-item"><i class="fas fa-robot"></i><span>Bot</span></div>
+                    <div class="tab-item"><i class="fas fa-user"></i><span>Profilo</span></div>
+                </div>
+            </div>
+
+            <!-- ============ VIRTUAL CALL OVERLAY ============ -->
+            <div class="vcall-overlay" id="vcall-overlay">
+                <div style="text-align:center;">
+                    <div class="vcall-avatar-ring" id="vcall-ring">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <div class="vcall-caller">Assistente InfoStranieri</div>
+                    <div class="vcall-status" id="vcall-status">Chiamata in arrivo...</div>
+                    <div class="vcall-timer" id="vcall-timer" style="display:none;">0:00</div>
+                </div>
+                <div class="vcall-message-box" id="vcall-msg-box">
+                    <div class="vcall-msg-label">Messaggio Vocale</div>
+                    <div class="vcall-msg-text" id="vcall-msg-text"></div>
+                    <div class="vcall-wave">
+                        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                        <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                    </div>
+                </div>
+                <div class="vcall-buttons" id="vcall-buttons">
+                    <button class="vcall-btn vcall-btn-decline" onclick="vcallDecline()"><i class="fas fa-phone-slash"></i><span>Rifiuta</span></button>
+                    <button class="vcall-btn vcall-btn-accept" onclick="vcallAccept()"><i class="fas fa-phone"></i><span>Rispondi</span></button>
+                </div>
+            </div>
+
+            <div class="home-indicator"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ===== DATA =====
+const SERVICES = [
+    { id: 'asilo', title: 'Asilo', icon: 'fa-ribbon', img: 'assets/icons_3d/asilo.png', hasNew: true },
+    { id: 'permesso', title: 'Permesso\ndi Soggiorno', icon: 'fa-id-card', img: 'assets/icons_3d/permesso.png', hasNew: false },
+    { id: 'carta', title: 'Carta\ndi Soggiorno', icon: 'fa-address-card', img: 'assets/icons_3d/carta.png', hasNew: false },
+    { id: 'cittadinanza', title: 'Cittadinanza', icon: 'fa-passport', img: 'assets/icons_3d/cittadinanza.png', hasNew: false },
+    { id: 'famiglia', title: 'Famiglia', icon: 'fa-people-roof', img: 'assets/icons_3d/famiglia.png', hasNew: true },
+    { id: 'bonus', title: 'Bonus', icon: 'fa-hand-holding-dollar', img: 'assets/icons_3d/bonus.png', hasNew: true },
+    { id: 'digital', title: 'Burocrazia\nDigitale', icon: 'fa-microchip', img: 'assets/icons_3d/burocrazia.png', hasNew: true },
+    { id: 'sanita', title: 'Sanità', icon: 'fa-heart-pulse', img: 'assets/icons_3d/sanita.png', hasNew: false },
+    { id: 'disabili', title: 'Disabili', icon: 'fa-wheelchair', img: 'assets/icons_3d/disabili.png', hasNew: false },
+    { id: 'kit', title: 'Compilazione\nKit', icon: 'fa-file-pen', img: 'assets/icons_3d/kit.png', hasNew: false }
+];
+
+const CATEGORIES = {
+    asilo: {
+        title: 'Protezione Internazionale',
+        subtitle: 'Scegli la tipologia di protezione',
+        items: [
+            { id: 'novita', name: 'Novità', icon: 'fa-bullhorn', hasNew: true },
+            { id: 'politico', name: 'Asilo Politico', icon: 'fa-ribbon', hasNew: false },
+            { id: 'sussidiaria', name: 'Protezione\nSussidiaria', icon: 'fa-shield-halved', hasNew: false },
+            { id: 'speciale', name: 'Protezione\nSpeciale', icon: 'fa-shield', hasNew: true },
+            { id: 'costituzionale', name: 'Asilo\nCostituzionale', icon: 'fa-landmark', hasNew: false },
+            { id: 'procedura', name: "Procedura\nd'Esame", icon: 'fa-comments', hasNew: true }
+        ]
+    },
+    cittadinanza: {
+        title: 'Cittadinanza',
+        subtitle: 'Modalità di acquisizione',
+        items: [
+            { id: 'novita', name: 'Novità', icon: 'fa-bullhorn', hasNew: false },
+            { id: 'residenza', name: 'Per Residenza', icon: 'fa-house', hasNew: false },
+            { id: 'matrimonio', name: 'Per Matrimonio', icon: 'fa-calendar', hasNew: false },
+            { id: 'iure-sanguinis', name: 'Iure Sanguinis', icon: 'fa-code-branch', hasNew: false }
+        ]
+    },
+    famiglia: {
+        title: 'Famiglia',
+        subtitle: 'Ricongiungimento e coesione',
+        items: [
+            { id: 'novita', name: 'Novità', icon: 'fa-bullhorn', hasNew: true },
+            { id: 'ricongiungimento', name: 'Ricongiungimento', icon: 'fa-people-arrows', hasNew: true },
+            { id: 'coesione', name: 'Coesione\nFamiliare', icon: 'fa-heart', hasNew: false },
+            { id: 'minori', name: 'Parenti di\nMinori', icon: 'fa-child', hasNew: true }
+        ]
+    },
+    bonus: {
+        title: 'Bonus',
+        subtitle: 'Agevolazioni e sussidi',
+        items: [
+            { id: 'novita', name: 'Novità', icon: 'fa-bullhorn', hasNew: true },
+            { id: 'soldi', name: 'Soldi e\nFamiglia', icon: 'fa-wallet', hasNew: true },
+            { id: 'spesa', name: 'Spesa e\nBollette', icon: 'fa-cart-shopping', hasNew: true },
+            { id: 'trasporti', name: 'Trasporti', icon: 'fa-bus', hasNew: true },
+            { id: 'isee', name: 'ISEE', icon: 'fa-calculator', hasNew: true }
+        ]
+    },
+    digital: {
+        title: 'Burocrazia Digitale',
+        subtitle: 'Identità e servizi digitali',
+        items: [
+            { id: 'novita', name: 'Novità', icon: 'fa-bullhorn', hasNew: true },
+            { id: 'spid', name: 'SPID', icon: 'fa-fingerprint', hasNew: true },
+            { id: 'cie', name: 'CIE', icon: 'fa-address-card', hasNew: true },
+            { id: 'pec', name: 'PEC', icon: 'fa-envelope-open-text', hasNew: true }
+        ]
+    },
+    permesso: {
+        title: 'Permesso di Soggiorno',
+        subtitle: 'Tipologie e rinnovo',
+        items: [
+            { id: 'novita', name: 'Novità', icon: 'fa-bullhorn', hasNew: false },
+            { id: 'primo', name: 'Primo Rilascio', icon: 'fa-file-circle-plus', hasNew: false },
+            { id: 'rinnovo-lavoro', name: 'Rinnovo con\nLavoro', icon: 'fa-briefcase', hasNew: false },
+            { id: 'rinnovo-no-lavoro', name: 'Rinnovo senza\nLavoro', icon: 'fa-user-clock', hasNew: true },
+            { id: 'conversione', name: 'Conversione', icon: 'fa-right-left', hasNew: false }
+        ]
+    },
+    carta: {
+        title: 'Carta di Soggiorno',
+        subtitle: 'Soggiornante di lungo periodo',
+        items: [
+            { id: 'novita', name: 'Novità', icon: 'fa-bullhorn', hasNew: false },
+            { id: 'requisiti', name: 'Requisiti', icon: 'fa-list-check', hasNew: false },
+            { id: 'documenti', name: 'Documenti', icon: 'fa-folder-open', hasNew: false }
+        ]
+    },
+    sanita: {
+        title: 'Sanità',
+        subtitle: 'Assistenza sanitaria',
+        items: [
+            { id: 'novita', name: 'Novità', icon: 'fa-bullhorn', hasNew: false },
+            { id: 'iscrizione', name: 'Iscrizione SSN', icon: 'fa-hospital', hasNew: false },
+            { id: 'tessera', name: 'Tessera Sanitaria', icon: 'fa-credit-card', hasNew: false }
+        ]
+    },
+    disabili: {
+        title: 'Disabili',
+        subtitle: 'Agevolazioni e diritti',
+        items: [
+            { id: 'novita', name: 'Novità', icon: 'fa-bullhorn', hasNew: false },
+            { id: 'legge104', name: 'Legge 104', icon: 'fa-gavel', hasNew: false },
+            { id: 'invalidita', name: 'Invalidità Civile', icon: 'fa-file-medical', hasNew: false }
+        ]
+    },
+    kit: {
+        title: 'Compilazione Kit',
+        subtitle: 'Guide Ufficiali Kit Giallo Poste',
+        items: [
+            { id: 'rinnovo', name: 'Kit Rinnovo', icon: 'fa-file-signature', hasNew: true },
+            { id: 'disoccupazione', name: 'Kit Attesa\nOccupazione', icon: 'fa-user-clock', hasNew: true },
+            { id: 'carta-soggiorno', name: 'Kit Carta di\nSoggiorno', icon: 'fa-address-card', hasNew: true }
+        ]
+    }
+};
+
+const LAWS = {
+    asilo: [
+        { id: 'pol-1', catId: 'politico', title: 'Status di Rifugiato', ref: 'Conv. Ginevra Art. 1', isNew: false, desc: 'Protezione per chi teme persecuzioni per razza, religione o opinione politica.', reqs: ['Fondato timore di persecuzione.','Mancanza protezione stato origine.'], duration: '5 anni (Rinnovabile)', docs: ['Memoria scritta.','Documenti identità.'], where: 'Commissione Territoriale.' },
+        { id: 'sus-1', catId: 'sussidiaria', title: 'Protezione Sussidiaria', ref: 'D.Lgs. 251/2007', isNew: false, desc: 'Per chi rischia danni gravi (tortura, guerra) se rimpatriato.', reqs: ['Rischio violenza indiscriminata.'], duration: '5 anni (Rinnovabile)', docs: ['Documentazione COI.'], where: 'Questura / Commissione.' },
+        { id: 'spe-1', catId: 'speciale', title: 'Protezione Speciale 2026', ref: 'Legge 50/2023', isNew: true, desc: 'Tutela per gravi motivi di salute o obblighi costituzionali.', reqs: ['Gravi patologie psicofisiche.','Legami familiari in Italia.'], duration: '2 anni (Non conv.)', docs: ['Certificati medici ASL.'], where: 'Questura locale.' },
+        { id: 'pro-1', catId: 'procedura', title: 'Modello C3 (Verbalizzazione)', ref: 'D.Lgs. 25/2008', isNew: false, desc: 'Il primo documento formale della richiesta d\'asilo.', reqs: ['Presenza in Italia.'], duration: 'Permesso 6 mesi', docs: ['Fototessere.','Dichiarazione domicilio.'], where: 'Questura / Polizia Frontiera.' },
+        { id: 'pro-2', catId: 'procedura', title: 'Regolamento Dublino III', ref: 'Reg. UE 604/2013', isNew: true, desc: 'Norme per stabilire lo stato UE competente per la domanda.', reqs: ['Primo ingresso in altro stato UE.','Impronte Eurodac presenti.'], duration: 'Transitoria', docs: ['Verbale identificazione.'], where: 'Unità Dublino.' }
+    ],
+    permesso: [
+        { id: 'per-rinnovo-lavoro', catId: 'rinnovo-lavoro', title: 'Rinnovo per Lavoro - Guida Completa', ref: 'Art. 5 comma 4 T.U.I.', isNew: false, dateAdded: '2026-04-17', desc: 'GUIDA COMPLETA al rinnovo del permesso di soggiorno per lavoro subordinato. Include costi, documenti, tempistiche e procedura passo-passo. Fonti: Polizia di Stato, Ministero dell\'Interno, Poste Italiane, Portale Immigrazione.', reqs: ['QUANDO: Almeno 60 gg PRIMA della scadenza. Max 60 gg DOPO.','ATTENZIONE: Dopo 60 gg senza domanda = irregolare + espulsione.','Contratto di lavoro attivo (determinato o indeterminato).','Reddito minimo: Assegno Sociale (7.002 euro/anno).','Con familiari: +50% per ogni familiare a carico.','Passaporto in corso di validita.','Assenza condanne penali gravi.'], duration: '1 o 2 anni (pari al contratto)', docs: ['Passaporto + fotocopia TUTTE le pagine.','Permesso attuale (originale + copia).','Codice Fiscale / Tessera Sanitaria.','Contratto di lavoro o UNILAV.','Ultime 3 buste paga.','CUD / Certificazione Unica.','730 o Modello Redditi.','Certificato di residenza.','Per colf/badanti: bollettini INPS.','Marca da bollo 16 euro.','Bollettino postale pagato.','4 fototessere recenti a colori.'], where: 'PASSO 1: Ritira Kit (busta gialla) GRATIS Sportello Amico Poste. PASSO 2: Compila Modulo 1 e 2 in STAMPATELLO PENNA NERA. NON firmare a casa! PASSO 3: Paga bollettini. PASSO 4: Porta tutto alle Poste, firma davanti operatore. Ricevi RICEVUTA. PASSO 5: Vai in Questura per IMPRONTE DIGITALI. Porta: ricevuta, passaporto, vecchio permesso, 4 foto, originali documenti. PASSO 6: Attendi SMS per RITIRO. Verifica su questure.poliziadistato.it/stranieri.' },
+        { id: 'per-costi', catId: 'rinnovo-lavoro', title: 'Costi Rinnovo Permesso 2026', ref: 'Poste Italiane - Min. Economia', isNew: false, dateAdded: '2026-04-17', desc: 'Dettaglio di TUTTE le spese per il rinnovo del permesso di soggiorno.', reqs: ['COSTI FISSI:','Spedizione Kit Postale: 30 euro.','Marca da bollo: 16 euro.','Stampa permesso elettronico: 30,46 euro (bollettino c/c 67422402).','CONTRIBUTO VARIABILE:','Fino a 1 anno: +40 euro.','Fino a 2 anni: +50 euro.','Lungo periodo UE: +100 euro.','TOTALE per 2 anni: circa 126,46 euro.','ESENZIONI: Minori, richiedenti asilo, protezione speciale.'], duration: 'Pagamento una tantum', docs: ['Bollettino c/c 67422402.','Marca da bollo 16 euro.','Contanti o carta per 30 euro spedizione.'], where: 'Ufficio Postale Sportello Amico. Bollettino pagabile anche su poste.it.' },
+        { id: 'per-questura', catId: 'rinnovo-lavoro', title: 'Appuntamento Questura - Cosa Portare', ref: 'poliziadistato.it', isNew: false, dateAdded: '2026-04-17', desc: 'Dopo aver spedito il kit riceverai convocazione per la Questura.', reqs: ['Presenza personale OBBLIGATORIA.','Impronte digitali TUTTE le dita.','Figli minori devono essere presenti.','Convocazione sulla ricevuta postale.','Verifica su questure.poliziadistato.it/stranieri.'], duration: 'Appuntamento: 30-60 min. Rilascio: da 60 gg a 6+ mesi.', docs: ['Ricevuta di convocazione.','Ricevuta assicurata postale ORIGINALE.','Passaporto ORIGINALE + fotocopie.','Vecchio permesso ORIGINALE.','4 fototessere a COLORI.','Ricevute bollettini.','ORIGINALI tutti i documenti del kit.'], where: 'Questura provincia (Ufficio Immigrazione). RITIRO: SMS o verifica online.' },
+        { id: 'per-rinnovo-no-lavoro', catId: 'rinnovo-no-lavoro', title: 'Rinnovo per Attesa Occupazione', ref: 'Art. 22 comma 11 T.U.I.', isNew: true, dateAdded: '2026-04-17', desc: 'Guida per chi ha perso il lavoro e deve rinnovare il permesso in attesa di nuova occupazione. Aggiornata con le norme del Decreto Cutro.', reqs: ['Perdita del lavoro (licenziamento o dimissioni).','Iscrizione al Centro per l\'Impiego (CPI).','Rilascio della DID (Dichiarazione Immediata Disponibilita).','Reddito minimo: 7.101,12 euro (Assegno Sociale 2026).','Risorse derivanti da NASpI o risparmi documentabili.'], duration: 'Minimo 1 ANNO (Decreto Cutro)', docs: ['Certificato iscrizione Centro per l\'Impiego.','DID (Dichiarazione Immediata Disponibilita).','Documentazione NASpI (se percepita).','Passaporto e vecchio permesso.','Ricevuta ospitalita o residenza.'], where: 'Kit Postale (Sportello Amico) poi Questura.' },
+        { id: 'per-costi-no-lavoro', catId: 'rinnovo-no-lavoro', title: 'Costi Rinnovo Attesa Occupazione', ref: 'Min. Interno - MEF', isNew: true, dateAdded: '2026-04-17', desc: 'Spese fisse per il rinnovo senza lavoro. Il costo e leggermente inferiore rispetto al rinnovo per 2 anni.', reqs: ['Spedizione Kit: 30 euro.','Marca da bollo: 16 euro.','Permesso elettronico: 30,46 euro.','Contributo 1 anno: 40 euro.','TOTALE: 116,46 euro.'], duration: 'Almeno 12 mesi', docs: ['Bollettino 30,46 + 40 euro.','Marca da bollo 16 euro.'], where: 'Ufficio Postale.' },
+        { id: 'per-primo', catId: 'primo', title: 'Primo Rilascio per Lavoro', ref: 'Art. 22 T.U.I.', isNew: false, desc: 'Procedura per chi entra in Italia con visto lavoro subordinato.', reqs: ['Visto d\'ingresso valido.','Nulla Osta Sportello Unico.','Contratto di soggiorno.','Codice Fiscale.'], duration: '1 o 2 anni', docs: ['Passaporto con visto.','Nulla Osta.','Contratto soggiorno.','Codice Fiscale.'], where: 'Sportello Unico Immigrazione poi Kit Postale.' },
+        { id: 'per-conv', catId: 'conversione', title: 'Conversione da Studio a Lavoro', ref: 'Art. 6 T.U.I.', isNew: true, desc: 'Chi ha permesso studio puo convertirlo in lavoro se laureato in Italia.', reqs: ['Laurea conseguita in Italia.','Proposta di lavoro.','Reddito adeguato.'], duration: '2 anni (Rinnovabile)', docs: ['Certificato laurea.','Modello Q.','Contratto lavoro.'], where: 'Portale ALI Ministero Interno + Sportello Unico.' },
+        { id: 'per-novita', catId: 'novita', title: 'Circolare Rinnovi Veloci 2026', ref: 'Min. Interno', isNew: true, dateAdded: '2026-04-10', desc: 'Nuove disposizioni per velocizzare i rinnovi.', reqs: ['Prenotazione online Portale Immigrazione.','Verifica stato pratica in tempo reale.','Obiettivo: rilascio entro 60 giorni.'], duration: 'In vigore dal 2026', docs: ['Credenziali Portale Immigrazione.'], where: 'portaleimmigrazione.it' }
+    ],
+        carta: [
+        { id: 'car-1', catId: 'requisiti', title: 'Reddito e Costi 2026', ref: 'INPS / Polizia di Stato', isNew: true, dateAdded: '2026-04-17', desc: 'Dettaglio degli importi necessari e delle spese fisse per il rilascio della Carta di Soggiorno (Permesso UE Lungo Periodo).', reqs: ['REDDITO ANNUO MINIMO (Assegno Sociale 2026):','Solo richiedente: 7.101,12 euro.','Con 1 familiare a carico: 10.651,68 euro.','Con 2 familiari a carico: 14.202,24 euro.','Con 3 familiari a carico: 17.752,80 euro.','REQUISITI BASE:','5 anni di residenza regolare e continuativa.','Test di lingua italiana livello A2 superato.','Assenza di pericolosita sociale.'], duration: 'Illimitata (Aggiornamento foto ogni 10 anni)', docs: ['COSTI DA SOSTENERE (Totale 176,46 euro):','Contributo fisso: 100,00 euro (bollettino).','Stampa carta elettronica: 30,46 euro (bollettino).','Spedizione Kit Postale: 30,00 euro (alle Poste).','Marca da bollo: 16,00 euro (in tabaccheria).','COSA METTERE NEL KIT:','Modulo 1 e 2 (se lavoratore).','Copia completa PASSAPORTO (tutte le pagine).','Copia permesso attuale e Codice Fiscale.','Dichiarazione redditi (CU, 730 o ultime 3 buste paga).','Certificato Idoneita Alloggiativa.','Certificato Residenza e Stato Famiglia.'], where: 'Ufficio Postale Sportello Amico. Il pagamento dei bollettini (100 + 30,46) si fa direttamente alle Poste.' },
+        { id: 'car-2', catId: 'documenti', title: 'Certificato Idoneità Alloggiativa', ref: 'D.M. 5 luglio 1975', isNew: false, desc: 'Attesta che l\'alloggio rispetta i parametri minimi di superficie e igiene.', reqs: ['Planimetria catastale.','Contratto affitto registrato.','Certificato agibilita.'], duration: 'Validita 6-12 mesi', docs: ['Modulo richiesta Comune.','Marca da bollo 16 euro.','Certificato impianti.'], where: 'Ufficio Tecnico del Comune di residenza.' },
+        { id: 'car-3', catId: 'penale', title: 'Certificato Penale Online con SPID', ref: 'Ministero della Giustizia - giustizia.it', isNew: true, dateAdded: '2026-04-17', desc: 'Guida alla richiesta del certificato del Casellario Giudiziale necessaria per la Carta di Soggiorno.', reqs: ['Necessario per dimostrare l\'assenza di condanne.','Si puo richiedere ONLINE per risparmiare tempo.','Accesso con SPID o CIE sul sito giustizia.it.'], duration: 'Validita 6 mesi', docs: ['COSTI CERTIFICATO:','Marca da bollo: 16,00 euro.','Diritti di certificato: 3,92 euro (totale 19,92 euro).','Urgenza: +3,92 euro (totale 23,84 euro).','PROCEDURA:','1. Entra nel sito giustizia.it (Servizi Online).','2. Prenota il certificato con SPID.','3. Ricevi conferma via email.','4. Ritira fisicamente presso la PROCURA DELLA REPUBBLICA scelta.'], where: 'Online (giustizia.it) poi ritiro presso la Procura della Repubblica.' }
+    ],
+    cittadinanza: [
+        { id: 'cit-1', catId: 'residenza', title: 'Cittadinanza per 10 anni Residenza', ref: 'Legge 91/1992 Art. 9', isNew: false, desc: 'Concessione cittadinanza per stranieri residenti da 10 anni.', reqs: ['10 anni residenza ininterrotta.','Reddito sufficiente ultimi 3 anni.','Lingua B1 certificata.','No condanne penali.'], duration: '24-36 mesi', docs: ['Certificato nascita legalizzato.','Penale estero apostillato.','Certificazione B1.','Contributo 250 euro.'], where: 'Portale Cives Ministero Interno (SPID o CIE).' },
+        { id: 'cit-2', catId: 'matrimonio', title: 'Cittadinanza per Matrimonio', ref: 'Legge 91/1992 Art. 5', isNew: true, desc: 'Dopo 2 anni residenza post-matrimonio (1 anno con figli).', reqs: ['Matrimonio valido e trascritto.','Convivenza effettiva.','No condanne penali.','Lingua B1.'], duration: 'Circa 24 mesi', docs: ['Atto matrimonio.','Passaporto e permesso.','Contributo 250 euro.','Certificazione B1.'], where: 'Prefettura online (SPID).' },
+        { id: 'cit-3', catId: 'iure-sanguinis', title: 'Cittadinanza Iure Sanguinis', ref: 'Circolare K28.1/1991', isNew: false, desc: 'Riconoscimento cittadinanza per discendenza da avo italiano.', reqs: ['Avo italiano senza rinuncia.','Documentazione linea genealogica.','No naturalizzazione straniera.'], duration: 'Da 6 mesi a 3+ anni', docs: ['Estratto nascita avo.','Certificato non naturalizzazione.','Certificati tutta la linea.'], where: 'Consolato o Comune di residenza.' }
+    ],
+    famiglia: [
+        { id: 'fam-1', catId: 'ricongiungimento', title: 'Nulla Osta Ricongiungimento', ref: 'Art. 29 T.U.I.', isNew: true, desc: 'Richiesta per portare in Italia coniuge, figli o genitori.', reqs: ['Reddito > Assegno Sociale.','Idoneità alloggiativa.'], duration: '90 giorni', docs: ['Certificato famiglia.','Modello S1/S2.'], where: 'Sportello Unico (SUI).' },
+        { id: 'fam-2', catId: 'coesione', title: 'Coesione Familiare', ref: 'Art. 30 T.U.I.', isNew: false, desc: 'Richiesta di permesso familiare direttamente dall\'Italia.', reqs: ['Legame con cittadino regolare.','Convivenza effettiva.'], duration: 'Pari al familiare garante', docs: ['Dichiarazione mantenimento.'], where: 'Questura (Ufficio Immigrazione).' },
+        { id: 'fam-3', catId: 'minori', title: 'Permesso Assistenza Minori', ref: 'Art. 31 comma 3 T.U.I.', isNew: true, desc: 'Autorizzazione temporanea per la cura di minori in Italia.', reqs: ['Grave disagio psicofisico minore.','Autorizzazione Tribunale Minorenni.'], duration: 'Stabilita dal Tribunale', docs: ['Relazione psicologica.','Ricorso legale.'], where: 'Tribunale per i Minorenni.' }
+    ],
+    bonus: [
+        { id: 'bon-1', catId: 'soldi', title: 'Assegno Unico Universale', ref: 'D.Lgs. 230/2021', isNew: true, desc: 'Contributo mensile per ogni figlio a carico fino a 21 anni.', reqs: ['Residenza 2 anni.','ISEE aggiornato.'], duration: 'Mensile', docs: ['IBAN.','Codici Fiscali figli.'], where: 'Sito INPS / CAF.' },
+        { id: 'bon-2', catId: 'spesa', title: 'Carta Dedicata a Te 2026', ref: 'Legge Bilancio', isNew: true, desc: 'Contributo di 500€ per spesa alimentare e carburanti.', reqs: ['ISEE sotto 15.000€.','Nucleo di 3+ persone.'], duration: 'Una tantum', docs: ['Comunicazione Comune.'], where: 'Poste Italiane.' },
+        { id: 'bon-3', catId: 'isee', title: 'Guida ISEE 2026', ref: 'Riforma ISEE', isNew: false, desc: 'Documento essenziale per accedere a tutti i bonus sociali.', reqs: ['Dati reddituali.','Giacenza media conti.'], duration: 'Valido fino al 31 Dic.', docs: ['730 o CU.','Contratto affitto.'], where: 'CAF (Gratuito).' }
+    ],
+    digital: [
+        { id: 'dig-1', catId: 'spid', title: 'Richiesta SPID per Stranieri', ref: 'Linee Guida AgID', isNew: true, desc: 'Identità digitale necessaria per accedere ai siti PA e INPS.', reqs: ['Tessera Sanitaria valida.','Documento identità italiano.'], duration: 'Illimitata', docs: ['CIE o Permesso Soggiorno.'], where: 'Poste / Aruba / Sielte.' },
+        { id: 'dig-2', catId: 'cie', title: 'Carta Identità Elettronica', ref: 'D.L. 78/2015', isNew: false, desc: 'Nuovo documento d\'identità con microchip e impronte.', reqs: ['Residenza nel comune.','Permesso valido.'], duration: '10 anni', docs: ['Fototessera.','22,21€.'], where: 'Anagrafe Comunale.' }
+    ],
+    sanita: [
+        { id: 'san-1', catId: 'iscrizione', title: 'Iscrizione Obbligatoria SSN', ref: 'L. 833/1978', isNew: false, desc: 'Registrazione al Sistema Sanitario per avere il Medico di base.', reqs: ['Residenza o Domicilio.','Lavoro o Famiglia.'], duration: 'Pari al permesso', docs: ['Tessera Sanitaria.','Certificato residenza.'], where: 'ASL Distretto Sanitario.' }
+    ],
+    disabili: [
+        { id: 'dis-1', catId: 'legge104', title: 'Agevolazioni Legge 104', ref: 'Legge 104/92', isNew: false, desc: 'Permessi lavorativi e detrazioni per disabilità grave.', reqs: ['Verbale commissione INPS.','Certificazione handicap.'], duration: 'Illimitata', docs: ['Certificato medico.'], where: 'INPS online.' }
+    ],
+    kit: [
+        { id: 'kit-1', catId: 'rinnovo', title: 'Guida: Kit Rinnovo Lavoro', ref: 'Poste Italiane / Questura', isNew: true, dateAdded: '2026-04-19', desc: 'Guida ufficiale passo-passo per la compilazione del Kit Giallo (Sportello Amico Poste) per il rinnovo del permesso per lavoro subordinato.', reqs: ['Ritiro Kit GRATUITO presso Sportello Amico (Poste Italiane).','NON FIRMARE e NON CHIUDERE la busta a casa. Verrà fatto davanti all\'operatore postale.','Compilare Modulo 1 e 2 in STAMPATELLO con PENNA NERA.'], duration: 'Ricevuta Poste immediata, Permesso in ~60gg', docs: ['1 Marca da bollo da 16,00€ (acquistata prima).','Fotocopia TUTTO il Passaporto (pagine scritte) e Permesso.','Fotocopia Contratto Lavoro, UNILAV e ultime 3 buste paga.','Bollettino premarcato 30,46€ + Contributo 40/50€.','Spesa spedizione Poste: 30,00€.'], where: 'Ritiro e spedizione: Poste Italiane. Fotosegnalamento: Questura.', pdf: 'Manuale_Compilazione_Lavoro_2026.pdf', video: 'rV0JkR2G55M' },
+        { id: 'kit-2', catId: 'disoccupazione', title: 'Guida: Kit Attesa Occupazione', ref: 'INPS / Portale Immigrazione', isNew: true, dateAdded: '2026-04-19', desc: 'Come compilare il Kit Giallo se hai perso il lavoro (dimissioni o licenziamento). E\' fondamentale iscriversi prima al Centro per l\'Impiego.', reqs: ['Iscrizione immediata al Centro per l\'Impiego (DID).','Mezzi di sostentamento (NASpI o risparmi/aiuto familiare).','Compilare Modulo 1 (indicando codice 03 Attesa Occupazione).'], duration: 'Validità: 1 Anno', docs: ['1 Marca da bollo da 16,00€.','Fotocopia Passaporto e Permesso in scadenza.','Certificato di Iscrizione Centro Impiego (DID).','Quietanza pagamento NASpI (se percepita).','Bollettino 30,46€ + Contributo 40€.'], where: 'Poste Italiane (spedizione) e Centro per l\'Impiego (iscrizione).', pdf: 'Guida_Attesa_Occupazione.pdf', video: 'qQz263mQhY0' },
+        { id: 'kit-3', catId: 'carta-soggiorno', title: 'Guida: Kit Carta di Soggiorno', ref: 'Ministero dell\'Interno', isNew: true, dateAdded: '2026-04-19', desc: 'Istruzioni dettagliate per la richiesta del "Permesso di soggiorno UE per soggiornanti di lungo periodo" (Carta di Soggiorno).', reqs: ['5 anni di residenza ininterrotta e regolare.','Superamento test lingua italiana livello A2 (Prefettura).','Reddito minimo annuo pari all\'Assegno Sociale INPS (circa 7000€/anno).'], duration: 'Validità: Illimitata (aggiornamento 10 anni)', docs: ['1 Marca da bollo da 16,00€.','Fotocopia TUTTO il Passaporto e Permesso.','Certificato Storico di Residenza e Stato di Famiglia.','Certificato IDONEITA\' ALLOGGIATIVA (Comune).','Ultime buste paga e CUD/730.','Bollettino 30,46€ + Contributo 100,00€.'], where: 'Sportello Amico Poste Italiane. (Test A2: prenota online Prefettura).', pdf: 'Requisiti_Carta_Soggiorno_UE.pdf', video: 'rV0JkR2G55M' }
+    ]
+};
+
+const FESTIVALS = [
+    {
+        country: 'Senegal', flag: 'https://flagcdn.com/w160/sn.png', name: 'Indipend.', date: '4 Apr',
+        fullName: 'Giorno dell\'Indipendenza del Senegal',
+        fullDate: '4 Aprile',
+        year: 'Dal 1960',
+        emoji: '🇸🇳',
+        desc: 'Il 4 aprile 1960 il Senegal ottenne l\'indipendenza dalla Francia, dopo secoli di colonizzazione. Questo giorno segna la nascita della Repubblica del Senegal come stato sovrano. Il primo presidente fu Léopold Sédar Senghor, poeta e intellettuale di fama mondiale.',
+        traditions: ['Parate militari e sfilate civili a Dakar','Discorso ufficiale del Presidente della Repubblica','Cerimonie di alzabandiera in tutto il Paese','Spettacoli di danza e musica tradizionale (Sabar, Mbalax)','Grandi festeggiamenti nelle piazze con tamburi e canti'],
+        food: ['Thiéboudienne (piatto nazionale: riso con pesce e verdure)','Yassa (pollo marinato al limone e cipolle)','Mafé (stufato con salsa di arachidi)','Bissap (bevanda di ibisco rossa)'],
+        curiosity: 'Il Senegal è l\'unico paese dell\'Africa occidentale a non aver mai subito un colpo di stato militare dalla sua indipendenza. La festa del 4 aprile è un simbolo di stabilità e democrazia.'
+    },
+    {
+        country: 'Marocco', flag: 'https://flagcdn.com/w160/ma.png', name: 'Trono', date: '30 Lug',
+        fullName: 'Festa del Trono (Eid Al-Arch)',
+        fullDate: '30 Luglio',
+        year: 'Dal 1999 (Re Mohammed VI)',
+        emoji: '🇲🇦',
+        desc: 'La Festa del Trono celebra l\'anniversario dell\'ascesa al trono del Re del Marocco. Dal 1999 si festeggia il 30 luglio, data dell\'incoronazione di Re Mohammed VI. È la festa nazionale più importante del Marocco e rappresenta l\'unità tra il popolo e la monarchia.',
+        traditions: ['Discorso reale alla nazione trasmesso in diretta TV','Cerimonia del Bay\'a (giuramento di fedeltà)','Parate militari e decorazioni delle città','Fuochi d\'artificio spettacolari in tutte le città','Illuminazione speciale di moschee e palazzi reali','Grazia reale ai detenuti'],
+        food: ['Couscous con sette verdure (piatto della festa)','Tajine di agnello con prugne e mandorle','Pastilla (sfoglia ripiena di pollo e mandorle)','Tè alla menta con pasticcini marocchini','Harira (zuppa tradizionale)'],
+        curiosity: 'Durante la Festa del Trono, il Re indossa una djellaba bianca e riceve il giuramento di fedeltà dai rappresentanti di tutte le regioni del Marocco. Le città vengono addobbate con bandiere rosse e verdi per settimane.'
+    },
+    {
+        country: 'Italia', flag: 'https://flagcdn.com/w160/it.png', name: 'Liberaz.', date: '25 Apr',
+        fullName: 'Festa della Liberazione',
+        fullDate: '25 Aprile',
+        year: 'Dal 1946',
+        emoji: '🇮🇹',
+        desc: 'Il 25 aprile 1945 segna la liberazione dell\'Italia dall\'occupazione nazifascista durante la Seconda Guerra Mondiale. I partigiani e gli Alleati liberarono le principali città del Nord Italia. È una festa nazionale che celebra la Resistenza, la democrazia e la libertà riconquistata.',
+        traditions: ['Cortei e manifestazioni in tutte le città italiane','Deposizione di corone ai monumenti ai caduti','Discorso del Presidente della Repubblica','Canti partigiani (soprattutto "Bella Ciao")','Mostre, film e incontri con testimoni dell\'epoca','Concerti e spettacoli gratuiti nelle piazze'],
+        food: ['Picnic e grigliate all\'aperto (tradizione del 25 aprile)','Focaccia e pane fresco','Salumi e formaggi tipici regionali','Pasta al forno e lasagne','Dolci della primavera: colomba pasquale, crostata'],
+        curiosity: 'La canzone "Bella Ciao" è diventata un simbolo mondiale di libertà e resistenza. Il 25 aprile è un giorno festivo: scuole, uffici e molti negozi sono chiusi. Per gli stranieri in Italia è un giorno importante perché celebra i valori di libertà e uguaglianza su cui si fonda la Repubblica.'
+    },
+    {
+        country: 'Cina', flag: 'https://flagcdn.com/w160/cn.png', name: 'Dragone', date: '19 Giu',
+        fullName: 'Festa delle Barche Drago (Duanwu Jie)',
+        fullDate: '5° giorno del 5° mese lunare (~Giugno)',
+        year: 'Da oltre 2000 anni',
+        emoji: '🇨🇳',
+        desc: 'La Festa delle Barche Drago (端午节 Duānwǔ Jié) è una delle feste tradizionali cinesi più antiche. Commemora il poeta Qu Yuan, che si gettò nel fiume Miluo per protesta politica nel 278 a.C. I pescatori remarono con le barche per cercarlo e gettarono riso nel fiume perché i pesci non ne divorassero il corpo.',
+        traditions: ['Gare di barche drago sui fiumi e laghi','Preparazione e consumo di Zongzi (involtini di riso)','Appensione di foglie di artemisia e calamo alle porte','Indossare braccialetti di filo colorato per protezione','Bere vino di realgar (tradizione antica)','Festival internazionali di Dragon Boat in tutto il mondo'],
+        food: ['Zongzi (involtini di riso glutinoso in foglie di bambù)','Zongzi dolci con pasta di fagioli rossi','Zongzi salati con carne di maiale e castagne','Uova bollite colorate con erbe','Tè verde e liquori tradizionali'],
+        curiosity: 'Le gare di Dragon Boat sono diventate uno sport internazionale praticato in oltre 85 paesi. In Italia ci sono diverse squadre di Dragon Boat! La festa è stata riconosciuta dall\'UNESCO come Patrimonio Culturale Immateriale dell\'Umanità nel 2009.'
+    },
+    {
+        country: 'Egitto', flag: 'https://flagcdn.com/w160/eg.png', name: 'Rivoluz.', date: '23 Lug',
+        fullName: 'Giorno della Rivoluzione Egiziana',
+        fullDate: '23 Luglio',
+        year: 'Dal 1952',
+        emoji: '🇪🇬',
+        desc: 'Il 23 luglio 1952 un gruppo di ufficiali militari noti come gli "Ufficiali Liberi", guidati da Mohamed Naguib e Gamal Abdel Nasser, rovesciò la monarchia di Re Farouk e proclamò la Repubblica d\'Egitto. Questa rivoluzione trasformò l\'Egitto in una repubblica moderna e indipendente, ponendo fine a secoli di dominio straniero.',
+        traditions: ['Parate militari al Cairo e nelle grandi città','Discorso presidenziale alla nazione','Fuochi d\'artificio lungo il Nilo','Concerti e spettacoli culturali','Decorazione delle strade con bandiere egiziane','Programmi TV speciali sulla storia della rivoluzione'],
+        food: ['Koshari (piatto nazionale: riso, lenticchie, pasta e salsa)','Ful Medames (fave stufate, colazione tradizionale)','Molokhia (zuppa di malva egiziana)','Fatir Meshaltet (sfoglia egiziana)','Hibiscus freddo (Karkadè)','Baklava e Kunafa (dolci orientali)'],
+        curiosity: 'Dopo la rivoluzione del 1952, Nasser nazionalizzò il Canale di Suez nel 1956, un evento che cambiò la geopolitica mondiale. L\'Egitto moderno è il paese arabo più popoloso con oltre 105 milioni di abitanti. La comunità egiziana in Italia è una delle più numerose tra quelle nordafricane.'
+    }
+];
+
+const NEWS = [
+    { tag: 'LEGALE', title: 'Sanatoria 2026: Pubblicate le circolari attuative', date: 'Oggi, 10:30' },
+    { tag: 'LAVORO', title: 'Decreto Flussi: Quote residue per lavoro subordinato', date: 'Ieri, 15:45' },
+    { tag: 'CITTADINANZA', title: 'Nuovo portale Cittadinanza: istruzioni SPID', date: '10 Apr 2026' }
+];
+
+// ===== NAVIGATION STACK =====
+let navStack = ['home'];
+let currentServiceId = null;
+let currentCategoryId = null;
+
+function showScreen(screenId, back) {
+    document.querySelectorAll('.screen').forEach(s => {
+        s.classList.remove('active', 'back-anim');
+    });
+    const screen = document.getElementById('screen-' + screenId);
+    screen.classList.add('active');
+    if (back) screen.classList.add('back-anim');
+    // Reset scroll
+    const scrollBody = screen.querySelector('.scroll-body');
+    if (scrollBody) scrollBody.scrollTop = 0;
+}
+
+function navigate(screenId) {
+    navStack.push(screenId);
+    showScreen(screenId, false);
+}
+
+function goBack() {
+    if (navStack.length > 1) {
+        navStack.pop();
+        const prev = navStack[navStack.length - 1];
+        showScreen(prev, true);
+    }
+}
+
+// Sidebar Functions
+function openMenu() {
+    document.getElementById('sidebar-menu').classList.add('active');
+    document.getElementById('sidebar-overlay').classList.add('active');
+}
+
+function closeMenu() {
+    document.getElementById('sidebar-menu').classList.remove('active');
+    document.getElementById('sidebar-overlay').classList.remove('active');
+}
+
+function openAltro() {
+    document.getElementById('sidebar-altro').classList.add('active');
+    document.getElementById('sidebar-overlay').classList.add('active');
+}
+
+function closeAltro() {
+    document.getElementById('sidebar-altro').classList.remove('active');
+    document.getElementById('sidebar-overlay').classList.remove('active');
+}
+
+// ===== CHAT SYSTEM =====
+let isRegistered = false;
+let chatUserName = '';
+
+const CHAT_MESSAGES = [
+    { sender: 'Ahmed', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100', text: 'Ciao a tutti! Qualcuno sa come funziona il rinnovo del permesso?', time: '14:20' },
+    { sender: 'Fatima', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100', text: 'Devi andare in Questura con il modulo compilato e la marca da bollo.', time: '14:22' },
+    { sender: 'Marco', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=100', text: 'La marca da bollo costa 16\u20ac. Ricordati anche il bollettino postale!', time: '14:25' },
+    { sender: 'Amina', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=100', text: 'Io ho fatto la richiesta online. \u00c8 molto pi\u00f9 veloce \ud83d\udc4d', time: '14:28' },
+    { sender: 'Fatima', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100', text: 'S\u00ec, il portale funziona bene. Serve lo SPID per\u00f2.', time: '14:30' },
+];
+
+function openChat() {
+    closeAltro();
+    navigate('chat');
+    renderChatMessages();
+}
+
+function renderChatMessages() {
+    const body = document.getElementById('chat-body');
+    body.innerHTML = '<div class="chat-date-divider">Oggi</div>';
+    CHAT_MESSAGES.forEach(msg => {
+        const mine = msg.isMine || false;
+        body.innerHTML += '<div class="chat-message '+(mine?'sent':'')+'">'
+            +'<img class="chat-avatar" src="'+msg.avatar+'" alt="'+msg.sender+'">'
+            +'<div><div class="chat-sender">'+msg.sender+'</div>'
+            +'<div class="chat-bubble">'+msg.text+'</div>'
+            +'<div class="chat-time">'+msg.time+'</div></div></div>';
+    });
+    body.scrollTop = body.scrollHeight;
+}
+
+function sendMessage() {
+    if (!isRegistered) {
+        alert('\u26a0\ufe0f Per scrivere nella chat devi essere registrato.\n\nVai nella sezione Profilo per registrarti o accedere al tuo account.');
+        return;
+    }
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+    const now = new Date();
+    const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+    CHAT_MESSAGES.push({ sender: chatUserName, avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100', text: text, time: time, isMine: true });
+    input.value = '';
+    renderChatMessages();
+    setTimeout(() => {
+        const replies = ['Ottima domanda!','S\u00ec, confermo.','Grazie! \ud83d\ude4f','Qualcuno pu\u00f2 confermare?','Consiglio il CAF.','Benvenuto/a! \ud83d\ude0a'];
+        const names = ['Fatima','Marco','Amina'];
+        const avs = ['https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100','https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=100','https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=100'];
+        const i = Math.floor(Math.random()*3);
+        const t = new Date();
+        CHAT_MESSAGES.push({ sender: names[i], avatar: avs[i], text: replies[Math.floor(Math.random()*replies.length)], time: t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0') });
+        renderChatMessages();
+    }, 2000);
+}
+
+// ===== OFFERTE DI LAVORO =====
+const JOB_OFFERS = [
+    { title: 'Cameriere/a', company: 'Ristorante Da Luigi', location: 'Roma', type: 'Part-time', date: '17 Apr', desc: 'Cerchiamo cameriere con esperienza. Orario serale.' },
+    { title: 'Badante convivente', company: 'Famiglia Rossi', location: 'Milano', type: 'Full-time', date: '16 Apr', desc: 'Assistenza anziana autosufficiente. Vitto e alloggio.' },
+    { title: 'Muratore', company: 'Edil Costruzioni Srl', location: 'Napoli', type: 'Full-time', date: '15 Apr', desc: 'Cantiere zona Fuorigrotta. Esperienza richiesta.' },
+    { title: 'Lavapiatti', company: 'Hotel Bella Vista', location: 'Firenze', type: 'Stagionale', date: '14 Apr', desc: 'Turno pranzo e cena. Contratto stagionale.' },
+    { title: 'Operaio agricolo', company: 'Azienda Agricola Verde', location: 'Foggia', type: 'Stagionale', date: '13 Apr', desc: 'Raccolta pomodori. Alloggio disponibile.' },
+];
+
+function openOfferte() {
+    closeAltro();
+    navigate('offerte');
+    renderJobOffers();
+}
+
+function renderJobOffers() {
+    const list = document.getElementById('job-list');
+    list.innerHTML = JOB_OFFERS.map(j =>
+        '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:16px;margin-bottom:12px;">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
+        +'<div style="font-size:16px;font-weight:800;color:#0f172a;font-family:Outfit,sans-serif;">'+j.title+'</div>'
+        +'<span style="font-size:10px;background:#dbeafe;color:#1e40af;padding:3px 8px;border-radius:20px;font-weight:700;">'+j.type+'</span>'
+        +'</div>'
+        +'<div style="font-size:13px;color:#64748b;margin-top:4px;"><i class="fas fa-building" style="margin-right:5px;color:#94a3b8;"></i>'+j.company+'</div>'
+        +'<div style="font-size:13px;color:#64748b;margin-top:3px;"><i class="fas fa-location-dot" style="margin-right:5px;color:#94a3b8;"></i>'+j.location+'</div>'
+        +'<div style="font-size:13px;color:#334155;margin-top:8px;line-height:1.5;">'+j.desc+'</div>'
+        +'<div style="font-size:11px;color:#94a3b8;margin-top:8px;text-align:right;">'+j.date+'</div>'
+        +'</div>'
+    ).join('');
+}
+
+function addJobOffer() {
+    if (!isRegistered) {
+        alert('\u26a0\ufe0f Per pubblicare un annuncio devi essere registrato.\n\nVai nella sezione Profilo per registrarti.');
+        return;
+    }
+    const title = prompt('Titolo del lavoro:');
+    if (!title) return;
+    const desc = prompt('Descrizione breve:');
+    if (!desc) return;
+    const location = prompt('Citt\u00e0:') || 'Italia';
+    JOB_OFFERS.unshift({ title: title, company: chatUserName, location: location, type: 'Nuovo', date: 'Oggi', desc: desc });
+    renderJobOffers();
+}
+
+function navigateToCategory(catId) {
+    closeMenu();
+    // Simulate navigation by clicking the corresponding service card
+    const services = {
+        'asilo': 'asilo',
+        'permesso': 'permesso',
+        'carta': 'carta',
+        'cittadinanza': 'cittadinanza',
+        'burocrazia': 'burocrazia',
+        'sanita': 'sanita',
+        'lavoro': 'lavoro',
+        'disabili': 'disabili',
+        'kit': 'kit',
+        'famiglia': 'famiglia',
+        'bonus': 'bonus'
+    };
+    const serviceId = services[catId];
+    if (serviceId) {
+        openService(serviceId);
+    }
+}
+
+// ===== RENDER HOME =====
+function renderHome() {
+    // Festivals
+    const fRow = document.getElementById('festivals-row');
+    fRow.innerHTML = FESTIVALS.map((f, idx) => `
+        <div class="festival-bubble" onclick="openFestival(${idx})">
+            <span class="bubble-country">${f.country}</span>
+            <div class="bubble-flag-wrap">
+                <img src="${f.flag}" alt="${f.country}">
+            </div>
+            <span class="bubble-fest-name">${f.name}</span>
+            <div class="bubble-date-badge">${f.date}</div>
+        </div>
+    `).join('');
+
+    // Services
+    const grid = document.getElementById('services-grid');
+    grid.innerHTML = SERVICES.map(s => `
+        <div class="service-card" onclick="openService('${s.id}')">
+            ${s.hasNew ? '<div class="badge-new">NEW</div>' : ''}
+            <div class="icon-circle">
+                ${s.img ? `<img src="${s.img}" alt="${s.title}">` : `<i class="fas ${s.icon}"></i>`}
+            </div>
+            <span class="card-label">${s.title.replace(/\n/g, '<br>')}</span>
+        </div>
+    `).join('');
+
+    // News
+    const newsList = document.getElementById('news-list');
+    newsList.innerHTML = NEWS.map(n => `
+        <div class="news-item">
+            <div>
+                <div class="news-tag">${n.tag}</div>
+                <div class="news-title">${n.title}</div>
+                <div class="news-date">${n.date}</div>
+            </div>
+            <i class="fas fa-chevron-right" style="color:#cbd5e1;"></i>
+        </div>
+    `).join('');
+}
+
+// ===== OPEN SERVICE (Category folders) =====
+function openService(serviceId) {
+    currentServiceId = serviceId;
+    const data = CATEGORIES[serviceId];
+    if (!data) {
+        // For services without categories (like kit), just show a placeholder
+        document.getElementById('cat-screen-title').textContent = SERVICES.find(s=>s.id===serviceId)?.title.replace(/\n/g,' ') || serviceId;
+        document.getElementById('cat-section-subtitle').textContent = 'Contenuto in arrivo...';
+        document.getElementById('category-grid').innerHTML = '<p style="text-align:center;color:#94a3b8;padding:40px 20px;font-style:italic;">Sezione in fase di sviluppo</p>';
+        navigate('categories');
+        return;
+    }
+
+    document.getElementById('cat-screen-title').textContent = data.title;
+    document.getElementById('cat-section-subtitle').textContent = data.subtitle;
+
+    const grid = document.getElementById('category-grid');
+    grid.innerHTML = data.items.map(cat => `
+        <div class="category-card" onclick="openCategory('${serviceId}', '${cat.id}')">
+            ${cat.hasNew ? '<div class="badge-new">NEW</div>' : ''}
+            <div class="icon-circle" style="width:70px; height:70px;">
+                <i class="fas ${cat.icon}" style="font-size:28px;"></i>
+            </div>
+            <span>${cat.name.replace(/\n/g, '<br>')}</span>
+        </div>
+    `).join('');
+
+    navigate('categories');
+}
+
+// ===== OPEN CATEGORY (Law list) =====
+function openCategory(serviceId, categoryId) {
+    currentCategoryId = categoryId;
+    const catData = CATEGORIES[serviceId];
+    const catName = catData?.items?.find(c => c.id === categoryId)?.name?.replace(/\n/g, ' ') || categoryId;
+    document.getElementById('laws-screen-title').textContent = catName;
+
+    const laws = LAWS[serviceId] || [];
+    let filtered;
+    if (categoryId === 'novita') {
+        filtered = laws.filter(l => l.isNew);
+    } else {
+        filtered = laws.filter(l => l.catId === categoryId);
+    }
+
+    const list = document.getElementById('laws-list');
+    if (filtered.length === 0) {
+        list.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:40px 20px;font-style:italic;">Nessuna legge in questa categoria</p>';
+    } else {
+        list.innerHTML = filtered.map(law => `
+            <div class="law-card ${law.isNew ? 'unread' : ''}" onclick="openDetail('${serviceId}', '${law.id}')">
+                <div class="law-icon-wrap">
+                    <i class="fas ${law.isNew ? 'fa-bolt' : 'fa-file-lines'}"></i>
+                </div>
+                <div class="law-card-content">
+                    <div class="law-card-title">${law.title}</div>
+                    <div class="law-card-ref">${law.ref}</div>
+                </div>
+                <i class="fas fa-chevron-right chevron"></i>
+            </div>
+        `).join('');
+    }
+
+    navigate('laws');
+}
+
+// ===== OPEN DETAIL =====
+function openDetail(serviceId, lawId) {
+    const laws = LAWS[serviceId] || [];
+    const law = laws.find(l => l.id === lawId);
+    if (!law) return;
+
+    const container = document.getElementById('detail-content');
+    container.innerHTML = `
+        ${law.isNew ? `<div class="detail-banner"><i class="fas fa-sparkles"></i> NOVITÃ€: ${law.dateAdded || '2026'}</div>` : ''}
+        <div class="detail-title">${law.title}</div>
+        <div class="detail-ref-box"><i class="fas fa-book"></i> ${law.ref}</div>
+
+        <div class="detail-section-title">Descrizione</div>
+        <div class="detail-text">${law.desc}</div>
+
+        <div class="detail-section-title">Requisiti</div>
+        ${law.reqs.map(r => `<div class="detail-bullet"><div class="dot"></div><span>${r}</span></div>`).join('')}
+
+        <div class="detail-info-box">
+            <div class="label"><i class="fas fa-clock"></i> Durata</div>
+            <div class="value">${law.duration}</div>
+        </div>
+
+        <div class="detail-section-title">Documenti Necessari</div>
+        ${law.docs.map(d => `<div class="detail-bullet"><div class="dot"></div><span>${d}</span></div>`).join('')}
+
+        <div class="detail-where-box">
+            <div class="label"><i class="fas fa-location-dot"></i> Dove Presentare</div>
+            <div class="value">${law.where}</div>
+        </div>
+        
+        ${law.video ? `
+        <div class="detail-section-title" style="margin-top:20px;">Video Tutorial Ufficiale</div>
+        <div style="border-radius:12px; overflow:hidden; margin-bottom:15px; background:#000; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+            <iframe width="100%" height="215" src="https://www.youtube.com/embed/${law.video}?rel=0" title="Video Tutorial" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        ` : ''}
+
+        ${law.pdf ? `
+        <div class="detail-section-title" style="margin-top:20px;">Guida PDF Completa</div>
+        <div style="border-radius:12px; overflow:hidden; margin-bottom:15px; border:1px solid #e2e8f0; height:350px; background:#f8fafc; position:relative;">
+            <div style="padding:10px; background:#0f4c81; color:white; font-size:14px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;">
+                <span><i class="fas fa-file-pdf" style="margin-right:5px;"></i> ${law.pdf}</span>
+                <i class="fas fa-expand"></i>
+            </div>
+            <iframe src="https://mozilla.github.io/pdf.js/web/viewer.html?file=https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf" width="100%" height="100%" style="border:none;"></iframe>
+        </div>
+        <button style="width:100%; background: #0f4c81; color:#fff; border:none; padding:12px; border-radius:8px; font-size:15px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:8px;">
+            <i class="fas fa-download"></i> Scarica sul Dispositivo
+        </button>
+        ` : ''}
+
+        <div style="height:40px;"></div>
+    `;
+
+    navigate('detail');
+}
+
+// ===== Tab bar Home click =====
+document.querySelectorAll('.tab-item').forEach(tab => {
+    if (tab.querySelector('span')?.textContent === 'Home') {
+        tab.addEventListener('click', () => {
+            navStack = ['home'];
+            showScreen('home', true);
+        });
+    }
+});
+
+// ===== PROMEMORIA CHIAMATA SYSTEM =====
+let savedReminders = [];
+let vcallTimerInterval = null;
+let vcallSeconds = 0;
+let currentCallReminder = null;
+
+function openPromemoria() {
+    closeAltro();
+    navigate('promemoria');
+    renderReminders();
+}
+
+function showAddReminder() {
+    // Set default date to tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('rem-date').value = tomorrow.toISOString().split('T')[0];
+    document.getElementById('rem-time').value = '10:00';
+    document.getElementById('rem-message').value = '';
+    document.getElementById('rem-location').value = '';
+    document.getElementById('rem-advance').value = '30';
+    navigate('add-reminder');
+}
+
+function saveReminder() {
+    const date = document.getElementById('rem-date').value;
+    const time = document.getElementById('rem-time').value;
+    const message = document.getElementById('rem-message').value.trim();
+    const location = document.getElementById('rem-location').value.trim();
+    const advance = document.getElementById('rem-advance').value;
+
+    if (!date || !time || !message || !location) {
+        alert('⚠️ Compila tutti i campi per salvare il promemoria.');
+        return;
+    }
+
+    const advanceLabels = { '10': '10 min prima', '30': '30 min prima', '60': '1 ora prima', '120': '2 ore prima', '1440': '1 giorno prima' };
+
+    const reminder = {
+        id: Date.now(),
+        date: date,
+        time: time,
+        message: message,
+        location: location,
+        advance: advance,
+        advanceLabel: advanceLabels[advance] || advance + ' min prima',
+        dateFormatted: new Date(date + 'T' + time).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+    };
+
+    savedReminders.unshift(reminder);
+    goBack();
+    setTimeout(() => renderReminders(), 300);
+}
+
+function renderReminders() {
+    const body = document.getElementById('promemoria-body');
+    if (savedReminders.length === 0) {
+        body.innerHTML = '<div class="reminder-empty"><i class="fas fa-calendar-plus"></i><p>Nessun promemoria salvato.<br>Tocca <strong>+</strong> per aggiungere il tuo primo appuntamento.</p></div>';
+        return;
+    }
+    body.innerHTML = '<div style="padding:15px;">' + savedReminders.map((r, i) => `
+        <div class="reminder-card">
+            <div class="rc-title"><i class="fas fa-calendar-check" style="color:#1e40af;margin-right:6px;"></i>${r.message}</div>
+            <div class="rc-detail"><i class="fas fa-calendar"></i> ${r.dateFormatted}</div>
+            <div class="rc-detail"><i class="fas fa-clock"></i> Ore ${r.time}</div>
+            <div class="rc-detail"><i class="fas fa-location-dot"></i> ${r.location}</div>
+            <div class="rc-detail"><i class="fas fa-bell" style="color:#f59e0b;"></i> Chiamata: ${r.advanceLabel}</div>
+            <div class="rc-msg">"${r.message}"</div>
+            <div class="rc-actions">
+                <button class="rc-btn rc-btn-call" onclick="simulateVirtualCall(${i})"><i class="fas fa-phone"></i> Prova Chiamata</button>
+                <button class="rc-btn rc-btn-delete" onclick="deleteReminder(${i})"><i class="fas fa-trash"></i> Elimina</button>
+            </div>
+        </div>
+    `).join('') + '</div>';
+}
+
+function deleteReminder(index) {
+    savedReminders.splice(index, 1);
+    renderReminders();
+}
+
+function simulateVirtualCall(index) {
+    currentCallReminder = savedReminders[index];
+    const overlay = document.getElementById('vcall-overlay');
+    overlay.classList.add('active');
+
+    // Reset state
+    document.getElementById('vcall-status').textContent = 'Chiamata in arrivo...';
+    document.getElementById('vcall-timer').style.display = 'none';
+    document.getElementById('vcall-msg-box').classList.remove('active');
+    document.getElementById('vcall-buttons').innerHTML = `
+        <button class="vcall-btn vcall-btn-decline" onclick="vcallDecline()"><i class="fas fa-phone-slash"></i><span>Rifiuta</span></button>
+        <button class="vcall-btn vcall-btn-accept" onclick="vcallAccept()"><i class="fas fa-phone"></i><span>Rispondi</span></button>
+    `;
+    vcallSeconds = 0;
+    if (vcallTimerInterval) clearInterval(vcallTimerInterval);
+}
+
+function vcallAccept() {
+    const r = currentCallReminder;
+    document.getElementById('vcall-status').textContent = 'In chiamata';
+    document.getElementById('vcall-timer').style.display = 'block';
+
+    // Build the gentle assistant message
+    const speechText = `"Buongiorno! Sono l'Assistente InfoStranieri. La chiamo per ricordarle gentilmente che ha un appuntamento previsto per il giorno ${r.dateFormatted} alle ore ${r.time}, presso ${r.location}. Il motivo del suo appuntamento è: ${r.message}. Le consiglio di preparare tutti i documenti necessari in anticipo e di arrivare con qualche minuto di anticipo. Le auguriamo una buona giornata! 😊"`;
+
+    document.getElementById('vcall-msg-text').textContent = speechText;
+    document.getElementById('vcall-msg-box').classList.add('active');
+
+    // Show hangup button only
+    document.getElementById('vcall-buttons').innerHTML = `
+        <button class="vcall-btn vcall-btn-hangup" onclick="vcallDecline()"><i class="fas fa-phone-slash" style="transform:rotate(135deg);"></i><span>Chiudi</span></button>
+    `;
+
+    // Start timer
+    vcallSeconds = 0;
+    vcallTimerInterval = setInterval(() => {
+        vcallSeconds++;
+        const m = Math.floor(vcallSeconds / 60);
+        const s = vcallSeconds % 60;
+        document.getElementById('vcall-timer').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+
+        // Auto-end call after 35 seconds
+        if (vcallSeconds >= 35) {
+            document.getElementById('vcall-status').textContent = 'Chiamata terminata';
+            clearInterval(vcallTimerInterval);
+            setTimeout(() => vcallDecline(), 2000);
+        }
+    }, 1000);
+}
+
+function vcallDecline() {
+    if (vcallTimerInterval) clearInterval(vcallTimerInterval);
+    document.getElementById('vcall-overlay').classList.remove('active');
+    vcallSeconds = 0;
+    currentCallReminder = null;
+}
+
+// ===== FESTIVAL DETAIL =====
+function openFestival(index) {
+    const f = FESTIVALS[index];
+    document.getElementById('festival-screen-title').textContent = f.emoji + ' ' + f.country;
+
+    const body = document.getElementById('festival-detail-body');
+    body.innerHTML = `
+        <div style="position:relative;overflow:hidden;">
+            <!-- Flag Banner -->
+            <div style="background:linear-gradient(135deg, #0a1628 0%, #1e40af 100%);padding:30px 20px 25px;text-align:center;position:relative;">
+                <img src="${f.flag}" alt="${f.country}" style="width:80px;height:auto;border-radius:8px;box-shadow:0 8px 25px rgba(0,0,0,0.3);border:3px solid rgba(255,255,255,0.3);margin-bottom:14px;">
+                <div style="font-size:22px;font-weight:900;color:#fff;line-height:1.2;font-family:'Outfit',sans-serif;">${f.fullName}</div>
+                <div style="display:flex;justify-content:center;gap:16px;margin-top:14px;">
+                    <div style="background:rgba(255,255,255,0.15);padding:6px 14px;border-radius:20px;display:flex;align-items:center;gap:6px;">
+                        <i class="fas fa-calendar" style="color:#f59e0b;font-size:12px;"></i>
+                        <span style="color:#fff;font-size:12px;font-weight:700;">${f.fullDate}</span>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.15);padding:6px 14px;border-radius:20px;display:flex;align-items:center;gap:6px;">
+                        <i class="fas fa-clock" style="color:#0ea5e9;font-size:12px;"></i>
+                        <span style="color:#fff;font-size:12px;font-weight:700;">${f.year}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="padding:20px;">
+                <!-- Descrizione -->
+                <div style="margin-bottom:20px;">
+                    <div style="font-size:16px;font-weight:800;color:#0f172a;margin-bottom:10px;font-family:'Outfit',sans-serif;">
+                        <i class="fas fa-book-open" style="color:#1e40af;margin-right:8px;"></i>Storia e Significato
+                    </div>
+                    <div style="font-size:14px;color:#334155;line-height:1.7;background:#f8fafc;padding:16px;border-radius:16px;border-left:4px solid #1e40af;">
+                        ${f.desc}
+                    </div>
+                </div>
+
+                <!-- Tradizioni -->
+                <div style="margin-bottom:20px;">
+                    <div style="font-size:16px;font-weight:800;color:#0f172a;margin-bottom:10px;font-family:'Outfit',sans-serif;">
+                        <i class="fas fa-star" style="color:#f59e0b;margin-right:8px;"></i>Come si Festeggia
+                    </div>
+                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:14px;box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+                        ${f.traditions.map(t => `
+                            <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">
+                                <div style="width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#ef4444);margin-top:6px;flex-shrink:0;"></div>
+                                <span style="font-size:13px;color:#334155;line-height:1.5;font-weight:500;">${t}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Cibo Tradizionale -->
+                <div style="margin-bottom:20px;">
+                    <div style="font-size:16px;font-weight:800;color:#0f172a;margin-bottom:10px;font-family:'Outfit',sans-serif;">
+                        <i class="fas fa-utensils" style="color:#10b981;margin-right:8px;"></i>Piatti Tipici della Festa
+                    </div>
+                    <div style="display:grid;gap:8px;">
+                        ${f.food.map(item => `
+                            <div style="background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:1px solid #bbf7d0;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
+                                <span style="font-size:18px;">🍽️</span>
+                                <span style="font-size:13px;color:#166534;font-weight:600;">${item}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Curiosità -->
+                <div style="margin-bottom:30px;">
+                    <div style="font-size:16px;font-weight:800;color:#0f172a;margin-bottom:10px;font-family:'Outfit',sans-serif;">
+                        <i class="fas fa-lightbulb" style="color:#8b5cf6;margin-right:8px;"></i>Lo Sapevi?
+                    </div>
+                    <div style="background:linear-gradient(135deg,#faf5ff,#f3e8ff);border:1px solid #ddd6fe;border-radius:16px;padding:16px;border-left:4px solid #8b5cf6;">
+                        <span style="font-size:13px;color:#5b21b6;line-height:1.7;font-weight:500;">${f.curiosity}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    navigate('festival');
+}
+
+// ===== INIT =====
+renderHome();
+</script>
+
+</body>
+</html>
+

@@ -5,6 +5,7 @@ export interface FamilyCategory {
 }
 
 export const FAMILY_CATEGORIES: FamilyCategory[] = [
+  { id: 'novita', name: 'Novità', icon: 'megaphone-outline' },
   { id: 'ricongiungimento', name: 'Ricongiungimento', icon: 'people-outline' },
   { id: 'coesione', name: 'Coesione Familiare', icon: 'heart-outline' },
   { id: 'minori', name: 'Parenti di Minori', icon: 'child-outline' }
@@ -74,10 +75,36 @@ export const FAMILY_LAWS: FamilyLaw[] = [
       'Stato di Famiglia: Certificato o autocertificazione dello stato di famiglia attuale.'
     ],
     whereToApply: 'Sportello Unico Immigrazione (per il Nulla Osta) e successiva Busta Gialla (per il Permesso).'
+  },
+  {
+    id: 'fam-coe-1',
+    categoryId: 'coesione',
+    title: 'Coesione Familiare sul Territorio',
+    lawReference: 'Art. 30 T.U. Immigrazione',
+    description: 'Diritto di richiedere un permesso per motivi familiari rivolgendosi in modo diretto alla Questura se il familiare si trova regolarmente in Italia da meno di 1 anno (oppure in alcuni casi eccezionali). L\'iter evita la lunga attesa del nulla osta dall\'estero.',
+    requirements: [
+      'Legame familiare con un cittadino regolarmente soggiornante in Italia.',
+      'Presenza regolare del familiare (es. visto turistico in scadenza).',
+      'Alloggio idoneo e reddito sufficiente da parte del garante italiano o residente.'
+    ],
+    duration: 'Pari al permesso del garante.',
+    isNew: false,
+    dateAdded: '2026-01-15',
+    documentsNeeded: [
+      'Documentazione che provi il legame di parentela (matrimonio, nascita) legalizzata.',
+      'Passaporto del richiedente in corso di validità.',
+      'Documenti di reddito (CUD/CU) e alloggio (Idoneità) del garante.'
+    ],
+    whereToApply: 'Questura (Ufficio Immigrazione) tramite Kit Giallo presso la posta se autorizzati, oppure appuntamento diretto se previsto dalla Questura locale.'
   }
 ];
 
 const readLaws = new Set<string>();
 export const isLawUnread = (id: string, isNew: boolean) => !readLaws.has(id) && isNew;
 export const markLawAsRead = (id: string) => readLaws.add(id);
+export const categoryHasUnreadNews = (categoryId: string) => {
+  if (categoryId === 'novita') return hasAnyUnreadNews();
+  return FAMILY_LAWS.some(law => law.categoryId === categoryId && isLawUnread(law.id, law.isNew));
+};
+
 export const hasAnyUnreadNews = () => FAMILY_LAWS.some(law => isLawUnread(law.id, law.isNew));

@@ -14,7 +14,7 @@ export default function FamigliaCategoryLawsScreen() {
   }, []));
 
   const category = FAMILY_CATEGORIES.find(c => c.id === id);
-  const laws = FAMILY_LAWS.filter(l => l.categoryId === id);
+  const laws = id === 'novita' ? FAMILY_LAWS.filter(l => l.isNew) : FAMILY_LAWS.filter(l => l.categoryId === id);
 
   if (!category) return null;
 

@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { useRouter, useFocusEffect } from 'expo-router';
+import { useRouter, useFocusEffect, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { LONG_TERM_CATEGORIES } from '../../constants/long_term_laws';
+import { LONG_TERM_CATEGORIES, categoryHasUnreadNews } from '../../constants/long_term_laws';
 
 export default function CartaFoldersScreen() {
     const router = useRouter();
@@ -14,23 +14,32 @@ export default function CartaFoldersScreen() {
     }, []));
 
     return (
-       <ScrollView style={styles.container} contentContainerStyle={styles.listContent}>
+       <>
+           <Stack.Screen options={{ title: 'Carta di Soggiorno UE' }} />
+           <ScrollView style={styles.container} contentContainerStyle={styles.listContent}>
            <Text style={styles.sectionTitle}>Tutto sulla Carta di Soggiorno UE</Text>
            <View style={styles.grid}>
               {cats.map(cat => {
+                 const hasNovelty = categoryHasUnreadNews(cat.id);
                  return (
                     <TouchableOpacity 
                        key={cat.id} 
                        style={styles.card} 
                        onPress={() => (router.push as any)(`/carta/category/${cat.id}`)}
                     >
+                       {hasNovelty && (
+                          <View style={styles.badgeNew}>
+                             <Text style={styles.badgeText}>NOVITÀ</Text>
+                          </View>
+                       )}
                        <Ionicons name={cat.icon as any} size={32} color="#0f4c81" style={styles.cardIcon} />
                        <Text style={styles.cardTitle}>{cat.name}</Text>
                     </TouchableOpacity>
                  )
               })}
            </View>
-       </ScrollView>
+        </ScrollView>
+       </>
     )
 }
 
@@ -57,5 +66,7 @@ const styles = StyleSheet.create({
     elevation: 3 
   },
   cardIcon: { marginBottom: 14 },
-  cardTitle: { color: '#1e293b', fontSize: 13, fontWeight: '800', textAlign: 'center', lineHeight: 18 }
+  cardTitle: { color: '#1e293b', fontSize: 13, fontWeight: '800', textAlign: 'center', lineHeight: 18 },
+  badgeNew: { position: 'absolute', top: -10, right: -6, backgroundColor: '#ef4444', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12, zIndex: 10, shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.2, elevation: 5 },
+  badgeText: { color: '#fff', fontSize: 9, fontWeight: '900', letterSpacing: 0.8 },
 });

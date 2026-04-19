@@ -14,7 +14,7 @@ export default function CategoryLawsScreen() {
   }, []));
 
   const category = ASYLUM_CATEGORIES.find(c => c.id === id);
-  const laws = ASYLUM_LAWS.filter(l => l.categoryId === id);
+  const laws = id === 'novita' ? ASYLUM_LAWS.filter(l => l.isNew) : ASYLUM_LAWS.filter(l => l.categoryId === id);
 
   if (!category) return null;
 

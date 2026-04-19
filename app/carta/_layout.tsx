@@ -9,7 +9,7 @@ export default function CartaLayout() {
           title: 'Carta di Soggiorno',
           headerStyle: { backgroundColor: '#0f4c81' },
           headerTintColor: '#fff',
-          headerTitleStyle: { fontWeight: 'bold' }
+          headerTitleStyle: { color: '#fff', fontSize: 20, fontWeight: '900' }
         }} 
       />
       <Stack.Screen 

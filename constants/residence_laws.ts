@@ -5,8 +5,8 @@ export interface ResidenceCategory {
 }
 
 export const RESIDENCE_CATEGORIES: ResidenceCategory[] = [
+  { id: 'novita', name: 'Novità', icon: 'megaphone-outline' },
   { id: 'rinnovo', name: 'Rinnovo', icon: 'refresh-outline' },
-  { id: 'aggiornamento', name: 'Aggiornamento', icon: 'create-outline' },
   { id: 'duplicato', name: 'Smarrimento/Duplicato', icon: 'copy-outline' }
 ];
 
@@ -104,4 +104,9 @@ export const RESIDENCE_LAWS: ResidenceLaw[] = [
 const readLaws = new Set<string>();
 export const isLawUnread = (id: string, isNew: boolean) => !readLaws.has(id) && isNew;
 export const markLawAsRead = (id: string) => readLaws.add(id);
+export const categoryHasUnreadNews = (categoryId: string) => {
+  if (categoryId === 'novita') return hasAnyUnreadNews();
+  return RESIDENCE_LAWS.some(law => law.categoryId === categoryId && isLawUnread(law.id, law.isNew));
+};
+
 export const hasAnyUnreadNews = () => RESIDENCE_LAWS.some(law => isLawUnread(law.id, law.isNew));

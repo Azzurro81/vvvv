@@ -5,6 +5,7 @@ export interface AsylumCategory {
 }
 
 export const ASYLUM_CATEGORIES: AsylumCategory[] = [
+  { id: 'novita', name: 'Novità', icon: 'megaphone-outline' },
   { id: 'politico', name: 'Asilo Politico', icon: 'ribbon-outline' },
   { id: 'sussidiaria', name: 'Protezione Sussidiaria', icon: 'shield-half-outline' },
   { id: 'speciale', name: 'Protezione Speciale', icon: 'shield-checkmark-outline' },
@@ -189,6 +190,27 @@ export const ASYLUM_LAWS: AsylumLaw[] = [
       'Prova di impossibilità di cure nel Paese d\'origine.'
     ],
     whereToApply: 'Questura locale (Ufficio Immigrazione).'
+  },
+  {
+    id: 'asy-cos-1',
+    categoryId: 'costituzionale',
+    title: 'Asilo Costituzionale',
+    lawReference: 'Art. 10 comma 3 Costituzione Italiana',
+    description: 'Il diritto riconosciuto direttamente dalla Costituzione Italiana per proteggere colui al quale nel proprio paese viene impedito l\'effettivo esercizio delle libertà democratiche.',
+    requirements: [
+      'Privazione sistematica delle libertà democratiche nel paese d\'origine (es. regimi dittatoriali).',
+      'Essere presenti in Italia.',
+      'Istanza autonoma presentata alle autorità.'
+    ],
+    duration: 'Stato tutelato finché permane la limitazione nel Paese estero.',
+    isNew: false,
+    dateAdded: '2025-11-20',
+    documentsNeeded: [
+      'Documentazione probatoria della limitazione democratica o documenti di organizzazioni internazionali.',
+      'Dichiarazioni personali strutturate e credibili.',
+      'Mandato a un avvocato per l\'istruttoria del provvedimento civile se si richiede il riconoscimento tramite magistratura ordinaria.'
+    ],
+    whereToApply: 'Spesso invocato tramite Ricorso Civile nei Tribunali (Sezioni Specializzate), in quanto diritto costituzionalmente garantito in via autonoma rispetto alla procedura europea.'
   }
 ];
 
@@ -205,6 +227,7 @@ export const markLawAsRead = (id: string) => {
 };
 
 export const categoryHasUnreadNews = (categoryId: string) => {
+  if (categoryId === 'novita') return hasAnyUnreadNews();
   return ASYLUM_LAWS.some(law => law.categoryId === categoryId && isLawUnread(law.id, law.isNew));
 };
 
